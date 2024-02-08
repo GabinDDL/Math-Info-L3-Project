@@ -1,0 +1,51 @@
+name: OCaml
+
+on: [push]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Install OCaml 5.1
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: 5.1
+
+      - name: Install dependencies
+        run: opam install . --deps-only
+
+      - name: Build
+        run: opam exec -- dune build
+
+      - name: Test
+        run: opam exec -- dune runtest
+
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v4
+
+      - name: Install OCaml 5.1
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: 5.1
+
+      - name: Install dependencies
+        run: opam install . --deps-only
+
+      - name: Build
+        run: opam exec -- dune build
+
+      - name: Install dune-format
+        run: opam install ocamlformat
+
+      - name: Format
+        run: opam exec -- dune build @fmt --auto-promote
