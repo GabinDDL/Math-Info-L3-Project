@@ -3,10 +3,10 @@ L3 math-info project on recoloring, in algorithmic.
 
 ## Members
 
-| Name                | Gaufre username |
+| Name                | Github username |
 | :------------------ | :-------------: |
-| Thomas ARROUS       |     @arrous     |
-| Gabin DUDILLIEU     |    @gdudilli    |
+| Thomas ARROUS       |     @ThomArr     |
+| Gabin DUDILLIEU     |    @GabinDDL    |
 
 ## Development environment setup
 
