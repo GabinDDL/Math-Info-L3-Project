@@ -20,6 +20,5 @@ val depth_first_search :
 val breadth_first_search :
   graph -> vertex -> (vertex -> unit) -> (unit, graph_traversal_error) result
 
-  val pp_vertex : Format.formatter -> vertex -> unit
-
-  val pp_graph : Format.formatter -> graph -> unit
+val pp_vertex : Format.formatter -> vertex -> unit
+val pp_graph : Format.formatter -> graph -> unit

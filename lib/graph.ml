@@ -5,6 +5,36 @@ type neighbors = vertex list
 type graph = int * (vertex * neighbors) list
 type graph_traversal_error = UnknownVertex
 
+let pp_color fmt c =
+  let c_str =
+    match c with
+    | Red -> "Red"
+    | Blue -> "Blue"
+    | Green -> "Green"
+    | Yellow -> "Yellow"
+  in
+  Format.fprintf fmt "%s" c_str
+
+let pp_vertex fmt ((x, y), c) = Format.fprintf fmt "(%d, %d, %a)" x y pp_color c
+
+let pp_adjs fmt adjs =
+  adjs
+  |> List.iter (fun v ->
+         Format.fprintf fmt "%a" pp_vertex v;
+         Format.fprintf fmt ";@;")
+
+let pp_vertex_with_adjs fmt (v, adjs) =
+  Format.fprintf fmt "%a : @[<v>%a@]@;" pp_vertex v pp_adjs adjs
+
+let pp_all_vertex_with_adjs fmt lst =
+  lst
+  |> List.iter (fun v_with_adj ->
+         Format.fprintf fmt "%a" pp_vertex_with_adjs v_with_adj;
+         Format.fprintf fmt ";@;")
+
+let pp_graph fmt (t, lst) =
+  Format.fprintf fmt "Time %d : %a@;" t pp_all_vertex_with_adjs lst
+
 let rec get_neighbors g v =
   match g with
   | _, [] -> Error UnknownVertex
