@@ -17,7 +17,7 @@ jobs:
           ocaml-compiler: 5.1
 
       - name: Install dependencies
-        run: opam install . --deps-only --yes alcotest
+        run: opam install . --deps-only --with-test
 
       - name: Build
         run: opam exec -- dune build
