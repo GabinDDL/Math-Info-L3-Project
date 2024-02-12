@@ -10,6 +10,7 @@ tags: ["ocaml" "recoloration" "graph"]
 depends: [
   "ocaml"
   "dune" {>= "3.11"}
+  "alcotest" {with-test}
   "odoc" {with-doc}
 ]
 build: [

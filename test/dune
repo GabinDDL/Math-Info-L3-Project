@@ -1,2 +1,3 @@
 (test
- (name main_test))
+ (name main_test)
+ (libraries prjt_mi_recolor alcotest))
