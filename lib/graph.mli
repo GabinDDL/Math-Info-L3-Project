@@ -13,6 +13,7 @@ type graph_traversal_error = UnknownVertex
 
 val get_neighbors : graph -> vertex -> (neighbors, graph_traversal_error) result
 val is_vertex_of : graph -> vertex -> bool
+val init_toroidal_grid : int -> int -> int -> color array array -> graph
 
 val depth_first_search :
   graph -> vertex -> (vertex -> unit) -> (unit, graph_traversal_error) result

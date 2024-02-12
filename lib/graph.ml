@@ -44,6 +44,30 @@ let rec get_neighbors g v =
 let is_vertex_in l v = List.mem v l
 let is_vertex_of (_, s) v = List.exists (fun (v_s, _) -> v = v_s) s
 
+let get_neighbors_toroidal_grid w l x y a =
+  let n1 = ((if x = l - 1 then 0 else x + 1), y) in
+  let n2 = (x, if y = w - 1 then 0 else y + 1) in
+  let n3 = ((if x = 0 then l - 1 else x - 1), y) in
+  let n4 = (x, if y = 0 then w - 1 else y - 1) in
+  [
+    (n1, a.(snd n1).(fst n1));
+    (n2, a.(snd n2).(fst n2));
+    (n3, a.(snd n3).(fst n3));
+    (n4, a.(snd n4).(fst n4));
+  ]
+
+let init_toroidal_grid t w l a =
+  let rec aux_init_grid g x y =
+    let pos = (x, y) in
+    let c = a.(y).(x) in
+    let v = (pos, c) in
+    let v_and_neighbors = (v, get_neighbors_toroidal_grid w l x y a) in
+    if x = 0 && y = 0 then (t, v_and_neighbors :: g)
+    else if x = 0 then aux_init_grid (v_and_neighbors :: g) (l - 1) (y - 1)
+    else aux_init_grid (v_and_neighbors :: g) (x - 1) y
+  in
+  aux_init_grid [] (l - 1) (w - 1)
+
 let rec search g already_visited to_visit add app =
   match to_visit with
   | [] -> Ok ()
