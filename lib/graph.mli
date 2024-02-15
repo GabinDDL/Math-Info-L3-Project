@@ -1,4 +1,4 @@
-type color = Red | Blue | Green | Yellow
+type color = int
 type position = int * int
 
 type vertex = position * color
@@ -6,7 +6,11 @@ type vertex = position * color
 
 type neighbors = vertex list
 
-type graph = int * (vertex * neighbors) list
+type graph = {
+  time : int;
+  nb_vertex : int;
+  vertex_with_neighbors : (vertex * neighbors) list;
+}
 (** A graph is a time and a list of vertex with its neighbors. *)
 
 type graph_traversal_error = UnknownVertex

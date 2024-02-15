@@ -1,17 +1,30 @@
-type color = Red | Blue | Green | Yellow
+type color = int
 type position = int * int
 type vertex = position * color
 type neighbors = vertex list
-type graph = int * (vertex * neighbors) list
+
+type graph = {
+  time : int;
+  nb_vertex : int;
+  vertex_with_neighbors : (vertex * neighbors) list;
+}
+
 type graph_traversal_error = UnknownVertex
 
 let pp_color fmt c =
   let c_str =
     match c with
-    | Red -> "Red"
-    | Blue -> "Blue"
-    | Green -> "Green"
-    | Yellow -> "Yellow"
+    | 0 -> "Red"
+    | 1 -> "Blue"
+    | 2 -> "Green"
+    | 3 -> "Yellow"
+    | 4 -> "White"
+    | 5 -> "Black"
+    | 6 -> "Purple"
+    | 7 -> "Pink"
+    | 8 -> "Orange"
+    | 9 -> "Magenta"
+    | _ -> "Other"
   in
   Format.fprintf fmt "%s" c_str
 
@@ -32,17 +45,22 @@ let pp_all_vertex_with_adjs fmt lst =
          Format.fprintf fmt "%a" pp_vertex_with_adjs v_with_adj;
          Format.fprintf fmt ";@;")
 
-let pp_graph fmt (t, lst) =
-  Format.fprintf fmt "Time %d : %a@;" t pp_all_vertex_with_adjs lst
+let pp_graph fmt g =
+  Format.fprintf fmt "Time %d : %a@;" g.time pp_all_vertex_with_adjs
+    g.vertex_with_neighbors
 
-let rec get_neighbors g v =
-  match g with
-  | _, [] -> Error UnknownVertex
-  | t, (v_s, v_list) :: tl ->
-      if v_s = v then Ok v_list else get_neighbors (t, tl) v
+let get_neighbors g v =
+  let rec aux_get_neighbors lst =
+    match lst with
+    | [] -> Error UnknownVertex
+    | (v_s, v_list) :: tl -> if v_s = v then Ok v_list else aux_get_neighbors tl
+  in
+  aux_get_neighbors g.vertex_with_neighbors
 
 let is_vertex_in l v = List.mem v l
-let is_vertex_of (_, s) v = List.exists (fun (v_s, _) -> v = v_s) s
+
+let is_vertex_of g v =
+  List.exists (fun (v_s, _) -> v = v_s) g.vertex_with_neighbors
 
 let get_neighbors_toroidal_grid w l x y a =
   let n1 = ((if x = l - 1 then 0 else x + 1), y) in
@@ -57,14 +75,19 @@ let get_neighbors_toroidal_grid w l x y a =
   ]
 
 let init_toroidal_grid t w l a =
-  let rec aux_init_grid g x y =
+  let rec aux_init_grid lst x y =
     let pos = (x, y) in
     let c = a.(y).(x) in
     let v = (pos, c) in
     let v_and_neighbors = (v, get_neighbors_toroidal_grid w l x y a) in
-    if x = 0 && y = 0 then (t, v_and_neighbors :: g)
-    else if x = 0 then aux_init_grid (v_and_neighbors :: g) (l - 1) (y - 1)
-    else aux_init_grid (v_and_neighbors :: g) (x - 1) y
+    if x = 0 && y = 0 then
+      {
+        time = t;
+        nb_vertex = w * l;
+        vertex_with_neighbors = v_and_neighbors :: lst;
+      }
+    else if x = 0 then aux_init_grid (v_and_neighbors :: lst) (l - 1) (y - 1)
+    else aux_init_grid (v_and_neighbors :: lst) (x - 1) y
   in
   aux_init_grid [] (l - 1) (w - 1)
 
