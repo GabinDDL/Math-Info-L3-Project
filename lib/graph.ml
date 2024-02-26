@@ -126,11 +126,3 @@ let get_value_variable var dim =
   let y = x / dim in
   let x = x mod dim in
   (not, x, y, t, c)
-
-let check_coloration x y time card_color dim =
-  let colors = List.init card_color (fun i -> i) in
-  let rec aux colors =
-    match colors with 
-    | hd :: tl -> (get_name_variable (x,y,time,hd) dim) :: ((get_name_variable (x,y,time,hd) dim) :: aux colors)
-    | [] -> []
-  in aux colors
