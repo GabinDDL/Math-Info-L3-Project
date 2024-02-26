@@ -112,8 +112,8 @@ let add_breadth_first_search q lst = q @ lst
 let breadth_first_search g v app =
   search g [] [ v ] add_breadth_first_search app
 
-let get_name_variable (not, x, y, t, c) dim=
-  Printf.sprintf "%s%i" (if not then "-" else "") (x + y * dim  + t * dim * dim + c * dim * dim * dim)
+let get_name_variable (is_verif, x, y, t, c) dim=
+  Printf.sprintf "%s%i" (if is_verif then "" else "-") (x + y * dim  + t * dim * dim + c * dim * dim * dim)
 
 let get_value_variable var dim =
   let x = int_of_string var in
@@ -126,3 +126,4 @@ let get_value_variable var dim =
   let y = x / dim in
   let x = x mod dim in
   (not, x, y, t, c)
+
