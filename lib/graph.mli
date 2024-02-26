@@ -27,3 +27,8 @@ val breadth_first_search :
 
 val pp_vertex : Format.formatter -> vertex -> unit
 val pp_graph : Format.formatter -> graph -> unit
+
+(** Function that converts a quadruplet into a string. *)
+val get_name_variable : (int*int*int*int) -> int -> string
+(** Function that converts a string into corresponding quadruplet. *)
+val get_value_variable : string -> int -> (int*int*int*int)

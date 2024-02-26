@@ -111,3 +111,16 @@ let add_breadth_first_search q lst = q @ lst
 
 let breadth_first_search g v app =
   search g [] [ v ] add_breadth_first_search app
+
+let get_name_variable (x,y,t,c) dim=
+  Printf.sprintf "%i" (x + y * dim  + t * dim * dim + c * dim * dim * dim)
+
+let get_value_variable var dim =
+  let x = int_of_string var in
+  let c = x / (dim * dim * dim) in
+  let x = x mod (dim * dim * dim) in
+  let t = x / (dim * dim) in
+  let x = x mod (dim * dim) in
+  let y = x / dim in
+  let x = x mod dim in
+  (x, y, t, c)
