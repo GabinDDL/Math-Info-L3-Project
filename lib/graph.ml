@@ -112,15 +112,25 @@ let add_breadth_first_search q lst = q @ lst
 let breadth_first_search g v app =
   search g [] [ v ] add_breadth_first_search app
 
-let get_name_variable not (x,y,t,c) dim=
+let get_name_variable (not, x, y, t, c) dim=
   Printf.sprintf "%s%i" (if not then "-" else "") (x + y * dim  + t * dim * dim + c * dim * dim * dim)
 
 let get_value_variable var dim =
   let x = int_of_string var in
+  let not = x < 0 in
+  let x = if not then -x else x in
   let c = x / (dim * dim * dim) in
   let x = x mod (dim * dim * dim) in
   let t = x / (dim * dim) in
   let x = x mod (dim * dim) in
   let y = x / dim in
   let x = x mod dim in
-  (x, y, t, c)
+  (not, x, y, t, c)
+
+let check_coloration x y time card_color dim =
+  let colors = List.init card_color (fun i -> i) in
+  let rec aux colors =
+    match colors with 
+    | hd :: tl -> (get_name_variable (x,y,time,hd) dim) :: ((get_name_variable (x,y,time,hd) dim) :: aux colors)
+    | [] -> []
+  in aux colors
