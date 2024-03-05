@@ -112,8 +112,8 @@ let add_breadth_first_search q lst = q @ lst
 let breadth_first_search g v app =
   search g [] [ v ] add_breadth_first_search app
 
-let get_name_variable (is_verif, x, y, t, c) dim=
-  Printf.sprintf "%s%i" (if is_verif then "" else "-") (x + y * dim  + t * dim * dim + c * dim * dim * dim)
+let get_name_variable (x, y, t, c) dim=
+  Printf.sprintf "%i" (x + y * dim  + t * dim * dim + c * dim * dim * dim)
 
 let get_value_variable var dim =
   let x = int_of_string var in
@@ -126,4 +126,40 @@ let get_value_variable var dim =
   let y = x / dim in
   let x = x mod dim in
   (not, x, y, t, c)
+
+type 'a expression =
+| Variable of string
+| Not of 'a expression
+| And of 'a expression list
+| Or of 'a expression list
+
+let rec string_of_expr expr =
+  match expr with
+  | Variable (x) -> x
+  | Not e -> "¬(" ^ string_of_expr e ^ ")"
+  | And exprs -> "(" ^ String.concat "\n∧ " (List.map string_of_expr exprs) ^ ")"
+  | Or exprs -> "(" ^ String.concat " ∨ " (List.map string_of_expr exprs) ^ ")"
+
+let get_cnf_only_one_true (vars : string list) =
+  let rec not_all_except var = function
+    | [] -> []
+    | hd :: tl ->
+        (Or [Not (Variable var); Not (Variable hd)]) :: (not_all_except var tl)
+  in
+  let rec generate_exprs = function
+    | [] -> []
+    | hd :: tl ->
+        (not_all_except hd tl) @ (generate_exprs tl)
+  in
+  ((Or(List.map (fun x -> Variable (x)) vars)) :: (generate_exprs vars))
+  
+let check_have_color (x, y, t, c) (possibles_colors:color list) (dim : int) =
+  let rec aux res colors =
+    match colors with
+    | hd :: tl -> (if hd = c then Variable(get_name_variable (x,y,t,c) dim) else Not (Variable(get_name_variable (x,y,t,hd) dim))) :: aux res tl 
+    | [] -> []
+  in And (aux [] possibles_colors)
+
+let check_have_not_color (x, y, t, c) possibles_colors dim =
+  And ((Variable (get_name_variable (x,y,t,c) dim)) :: get_cnf_only_one_true ((List.map (fun color -> get_name_variable (x,y,t,color) dim) possibles_colors)))
 
