@@ -1,3 +1,10 @@
+(*
+PLEASE NOTE!
+This SAT_solver was made by someone else.
+Here is the original repository: 
+https://github.com/charliermarsh/OCaml-SAT-Solvers/
+*)
+
 open Cnf
 
 (* extracts a literal that appears as a unit clause in a given cnf *)

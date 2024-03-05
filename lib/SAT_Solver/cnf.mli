@@ -1,3 +1,10 @@
+(*
+PLEASE NOTE!
+This SAT_solver was made by someone else.
+Here is the original repository: 
+https://github.com/charliermarsh/OCaml-SAT-Solvers/
+*)
+
 type symbol = string
 type literal = symbol * bool
 type clause = literal list
