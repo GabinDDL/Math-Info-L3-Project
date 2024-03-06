@@ -1,5 +1,3 @@
-open SAT_Solver.Cnf
-
 type color = int
 type position = int * int
 
@@ -29,14 +27,3 @@ val breadth_first_search :
 
 val pp_vertex : Format.formatter -> vertex -> unit
 val pp_graph : Format.formatter -> graph -> unit
-
-val get_name_variable : int * int * int * int -> int -> string
-(** Function that converts a quadruplet into a string. *)
-
-val get_value_variable : string -> int -> bool * int * int * int * int
-(** Function that converts a string into corresponding quadruplet. *)
-
-val get_cnf_only_one_true : string list -> cnf
-val check_has_color : int * int * int * int -> color list -> int -> cnf
-val check_has_not_color : int * int * int * int -> color list -> int -> cnf
-val check_coloration_of_one_node : int -> int -> int -> color list -> int -> cnf
