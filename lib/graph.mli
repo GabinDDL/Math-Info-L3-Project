@@ -1,13 +1,13 @@
 type color = int
 type position = int * int
+type time = int
 
-type vertex = position * color
+type vertex = position * time * color
 (** A vertex is a position with its color. *)
 
 type neighbors = vertex list
 
 type graph = {
-  time : int;
   nb_vertex : int;
   vertex_with_neighbors : (vertex * neighbors) list;
 }
