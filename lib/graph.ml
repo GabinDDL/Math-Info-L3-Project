@@ -140,7 +140,7 @@ let get_cnf_only_one_true (vars : string list) : cnf =
   in
   List.map (fun x -> (x, true)) vars :: generate_exprs vars
 
-let check_have_color (x, y, t, c) (possibles_colors : color list) (dim : int) :
+let check_has_color (x, y, t, c) (possibles_colors : color list) (dim : int) :
     cnf =
   let rec aux res colors =
     match colors with
@@ -154,8 +154,8 @@ let check_have_color (x, y, t, c) (possibles_colors : color list) (dim : int) :
   in
   aux [] possibles_colors
 
-let check_have_not_color (x, y, t, c) possibles_colors dim : cnf =
-  [ (get_name_variable (x, y, t, c) dim, true) ]
+let check_has_not_color (x, y, t, c) possibles_colors dim : cnf =
+  [ (get_name_variable (x, y, t, c) dim, false) ]
   :: get_cnf_only_one_true
        (List.map
           (fun color -> get_name_variable (x, y, t, color) dim)
@@ -166,25 +166,25 @@ let or_cnf_dev cnf1 cnf2 =
     (fun acc clause1 -> acc @ List.map (fun clause2 -> clause1 @ clause2) cnf2)
     [] cnf1
 
-let check_coloration (x : int) (y : int) (t : int)
+let check_coloration_of_one_node (x : int) (y : int) (t : int)
     (possibles_colors : color list) (dim : int) : cnf =
   let rec check_coord_have_one_color colors =
     match colors with
     | hd :: tl ->
         or_cnf_dev
-          (check_have_not_color (x, y, t, hd) possibles_colors dim)
-          (check_have_color ((x + 1) mod dim, y, t, hd) possibles_colors dim)
+          (check_has_not_color (x, y, t, hd) possibles_colors dim)
+          (check_has_color ((x + 1) mod dim, y, t, hd) possibles_colors dim)
         @ or_cnf_dev
-            (check_have_not_color (x, y, t, hd) possibles_colors dim)
-            (check_have_color (x, (y + 1) mod dim, t, hd) possibles_colors dim)
+            (check_has_not_color (x, y, t, hd) possibles_colors dim)
+            (check_has_color (x, (y + 1) mod dim, t, hd) possibles_colors dim)
         @ or_cnf_dev
-            (check_have_not_color (x, y, t, hd) possibles_colors dim)
-            (check_have_color
+            (check_has_not_color (x, y, t, hd) possibles_colors dim)
+            (check_has_color
                ((x + dim - 1) mod dim, y, t, hd)
                possibles_colors dim)
         @ or_cnf_dev
-            (check_have_not_color (x, y, t, hd) possibles_colors dim)
-            (check_have_color
+            (check_has_not_color (x, y, t, hd) possibles_colors dim)
+            (check_has_color
                (x, (y + dim - 1) mod dim, t, hd)
                possibles_colors dim)
         @ check_coord_have_one_color tl
