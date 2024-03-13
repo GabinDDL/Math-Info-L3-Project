@@ -16,6 +16,10 @@ OUTPUT_EXT="output"
 TEMP_DIFF_FILE=".diff_temp"
 EXEC="dune exec prjt_mi_recolor"
 
+############################
+# Color print functions #
+############################
+
 yellow() {
     echo -e "\e[33m$@\e[0m"
 }
@@ -31,6 +35,10 @@ red() {
 blue() {
     echo -e "\e[1m\e[34m$@\e[0m"
 }
+
+############################
+# Init and cleaning functions #
+############################
 
 function init_dirs(){
     if [ ! -e "$TESTS_FOLDER" ];
@@ -61,17 +69,23 @@ function clean_output_dir(){
     mkdir "$TESTS_FOLDER/$OUTPUT_EXT"
 }
 
+###################
+# Tests functions #
+###################
+
 function test_one_output(){
     local file=$1
     local expected_output_file="$TESTS_FOLDER/$EXP_OUTPUT_EXT/$file"
     local output_file="$TESTS_FOLDER/$OUTPUT_EXT/$file"
+
     if [ ! -e "$output_file" ] || [ ! -f "$output_file" ];
     then
         red "FAIL: The output file $file does not exist or has not the good format"
         has_failed=true
         return 1
     fi
-    if  ! diff -y  $expected_output_file $output_file > $TEMP_DIFF_FILE;
+
+    if  ! diff -y  $expected_output_file $output_file > $TEMP_DIFF_FILE; # Compare expected output and output
     then
         red "FAIL: The output and expected output $file does not match..."
         has_failed=true
@@ -104,7 +118,11 @@ function test_outputs(){
     return $has_passed
 }
 
-function build_output(){
+###########################
+# Build and exec function #
+###########################
+
+function build_exec_output(){
     echo
     echo "-- Build outputs --"
     echo
@@ -129,10 +147,14 @@ function build_output(){
     return $has_passed
 }
 
+#################
+# Main function #
+#################
+
 function main(){
     init_dirs
     clean_output_dir
-    build_output
+    build_exec_output
     test_outputs
     clean_output_dir
     clean_temp_files
