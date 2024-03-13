@@ -2,13 +2,13 @@ open Prjt_mi_recolor.Graph
 open Prjt_mi_recolor.Parser
 
 let run_solver_on_file file =
-    Format.printf "%s" file;
+  Format.printf "%s" file;
   match parse_file_for_solver file with
   | Error e -> raise e
   | Ok ((l, w), a) ->
       let grid = init_toroidal_grid 0 l w a in
       pp_graph Format.std_formatter grid
-      (* TODO: To change with the result of SAT solver. *)
+(* TODO: To change with the result of SAT solver. *)
 
 let () =
   let l = Array.length Sys.argv in
