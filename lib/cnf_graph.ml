@@ -16,7 +16,7 @@ let get_value_variable var dim =
   let x = x mod dim in
   (not, x, y, t, c)
 
-let or_cnf_dev cnf1 cnf2 =
+let or_cnf_dev (cnf1 : cnf) (cnf2 : cnf) =
   List.fold_left
     (fun acc clause1 -> acc @ List.map (fun clause2 -> clause1 @ clause2) cnf2)
     [] cnf1
@@ -83,14 +83,13 @@ let check_coloration_of_one_node (x : int) (y : int) (t : int)
   check_coord_have_one_color possibles_colors
 
 let check_coloration_of_graph dim max_time nbr_colors : cnf =
-  let rec aux height width time =
-    if width < 0 then aux (height - 1) dim time
-    else if height < 0 then aux dim dim (time - 1)
-    else if time < 0 then []
+  let colors = List.init nbr_colors (fun x -> x) in
+  let rec aux width height time =
+    if width >= dim then aux 0 (height + 1) time
+    else if height >= dim then aux 0 0 (time + 1)
+    else if time >= max_time then []
     else
-      check_coloration_of_one_node height width time
-        (List.init nbr_colors (fun x -> x))
-        dim
-      @ aux height (width - 1) time
+      check_coloration_of_one_node width height time colors dim
+      @ aux (width + 1) height time
   in
-  aux (dim - 1) (dim - 1) max_time
+  aux 0 0 0
