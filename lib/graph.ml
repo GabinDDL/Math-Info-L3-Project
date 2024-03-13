@@ -75,7 +75,7 @@ let get_neighbors_toroidal_grid t w l x y a =
     (n4, t, a.(snd n4).(fst n4));
   ]
 
-let init_toroidal_grid t w l a =
+let init_toroidal_grid t l w a =
   let rec aux_init_grid lst x y =
     let pos = (x, y) in
     let c = a.(y).(x) in
