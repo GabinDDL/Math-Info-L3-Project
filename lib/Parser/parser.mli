@@ -1,1 +1,2 @@
-val parse_file_for_solver : string -> (((int * int) * (int array array)), exn) result
+val parse_file_for_solver :
+  string -> ((int * int) * int array array, exn) result
