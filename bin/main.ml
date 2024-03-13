@@ -8,6 +8,7 @@ let run_solver_on_file file =
   | Ok ((l, w), a) ->
       let grid = init_toroidal_grid 0 l w a in
       pp_graph Format.std_formatter grid
+      (* TODO: To change with the result of SAT solver. *)
 
 let () =
   let l = Array.length Sys.argv in
