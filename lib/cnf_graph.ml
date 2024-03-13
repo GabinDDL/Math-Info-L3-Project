@@ -93,3 +93,30 @@ let check_coloration_of_graph dim max_time nbr_colors : cnf =
       @ aux (width + 1) height time
   in
   aux 0 0 0
+
+let check_good_modif_coloration_of_graph dim time colors_list =
+  let rec aux height width =
+    if width < 0 then aux (height - 1) dim
+    else if height < 0 then []
+    else
+      List.fold_left
+        (fun acc color ->
+          or_cnf_dev
+            (check_has_not_color (width, height, time, color) colors_list dim)
+            (check_has_color
+               ((width + 1) mod dim, height, time + 1, color)
+               colors_list dim
+            @ check_has_color
+                ((width + dim - 1) mod dim, height, time + 1, color)
+                colors_list dim
+            @ check_has_color
+                (width, (height + 1) mod dim, time + 1, color)
+                colors_list dim
+            @ check_has_color
+                (width, (height + dim - 1) mod dim, time + 1, color)
+                colors_list dim)
+          @ acc)
+        [] colors_list
+      @ aux height (width - 1)
+  in
+  aux (dim - 1) (dim - 1)
