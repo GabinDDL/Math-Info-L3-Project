@@ -18,3 +18,5 @@ val check_has_not_color : int * int * int * int -> color list -> int -> cnf
 
 val check_coloration_of_one_node : int -> int -> int -> color list -> int -> cnf
 (** Function to check if a node is correctly colored. *)
+
+val check_coloration_of_graph : int -> int -> int -> cnf
