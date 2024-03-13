@@ -3,7 +3,7 @@
 #########################################
 ##  
 ##  SOURCE: Inspired by Yago Iglesias Vazquez
-##  DESCRIPTION: Written with purpose to practice for SWERC.
+##  DESCRIPTION: Written in a C project
 ##
 #########################################
 
