@@ -16,7 +16,7 @@ let get_variable_value var dim =
   let x = x mod dim in
   (not, x, y, t, c)
 
-let or_cnf_dev (cnf1 : cnf) (cnf2 : cnf) =
+let develop_or_cnf (cnf1 : cnf) (cnf2 : cnf) =
   List.fold_left
     (fun acc clause1 -> acc @ List.map (fun clause2 -> clause1 @ clause2) cnf2)
     [] cnf1
