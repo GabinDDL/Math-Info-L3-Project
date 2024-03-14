@@ -4,7 +4,7 @@ open Graph
 let get_name_variable (x, y, t, c) dim =
   Printf.sprintf "%i" (x + (y * dim) + (t * dim * dim) + (c * dim * dim * dim))
 
-let get_value_variable var dim =
+let get_variable_value var dim =
   let x = int_of_string var in
   let not = x < 0 in
   let x = if not then -x else x in
