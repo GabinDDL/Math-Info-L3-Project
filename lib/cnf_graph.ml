@@ -35,7 +35,7 @@ let get_only_one_true_cnf (vars : string list) : cnf =
   in
   generate_exprs vars
 
-let check_has_color (x, y, t, c) (possibles_colors : color list) (dim : int) :
+let check_has_color (x, y, t, c) (possible_colors : color list) (dim : int) :
     cnf =
   let rec aux res colors =
     match colors with
