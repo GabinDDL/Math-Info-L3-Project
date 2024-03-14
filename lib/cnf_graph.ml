@@ -103,16 +103,16 @@ let check_coloration_modification_of_graph dim time colors_list =
         (fun acc color ->
           develop_or_cnf
             (check_has_not_color (width, height, time, color) colors_list dim)
-            (check_has_color
+            (check_has_not_color
                ((width + 1) mod dim, height, time + 1, color)
                colors_list dim
-            @ check_has_color
+            @ check_has_not_color
                 ((width + dim - 1) mod dim, height, time + 1, color)
                 colors_list dim
-            @ check_has_color
+            @ check_has_not_color
                 (width, (height + 1) mod dim, time + 1, color)
                 colors_list dim
-            @ check_has_color
+            @ check_has_not_color
                 (width, (height + dim - 1) mod dim, time + 1, color)
                 colors_list dim)
           @ acc)
