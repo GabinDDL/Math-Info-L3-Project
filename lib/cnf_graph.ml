@@ -31,7 +31,7 @@ let get_only_one_true_cnf (vars : string list) : cnf =
   let rec generate_exprs = function
     | [] -> []
     | hd :: tl when tl = [] -> only_var_true hd vars
-    | hd :: tl -> or_cnf_dev (only_var_true hd vars) (generate_exprs tl)
+    | hd :: tl -> develop_or_cnf (only_var_true hd vars) (generate_exprs tl)
   in
   generate_exprs vars
 
@@ -47,40 +47,40 @@ let check_has_color (x, y, t, c) (possible_colors : color list) (dim : int) :
         :: aux res tl
     | [] -> []
   in
-  aux [] possibles_colors
+  aux [] possible_colors
 
-let check_has_not_color (x, y, t, c) possibles_colors dim : cnf =
+let check_has_not_color (x, y, t, c) possible_colors dim : cnf =
   [ (get_name_variable (x, y, t, c) dim, false) ]
-  :: get_cnf_only_one_true
+  :: get_only_one_true_cnf
        (List.map
           (fun color -> get_name_variable (x, y, t, color) dim)
-          possibles_colors)
+          possible_colors)
 
 let check_coloration_of_one_node (x : int) (y : int) (t : int)
-    (possibles_colors : color list) (dim : int) : cnf =
+    (possible_colors : color list) (dim : int) : cnf =
   let rec check_coord_have_one_color colors =
     match colors with
     | hd :: tl ->
-        or_cnf_dev
-          (check_has_not_color (x, y, t, hd) possibles_colors dim)
-          (check_has_color ((x + 1) mod dim, y, t, hd) possibles_colors dim)
-        @ or_cnf_dev
-            (check_has_not_color (x, y, t, hd) possibles_colors dim)
-            (check_has_color (x, (y + 1) mod dim, t, hd) possibles_colors dim)
-        @ or_cnf_dev
-            (check_has_not_color (x, y, t, hd) possibles_colors dim)
+        develop_or_cnf
+          (check_has_not_color (x, y, t, hd) possible_colors dim)
+          (check_has_color ((x + 1) mod dim, y, t, hd) possible_colors dim)
+        @ develop_or_cnf
+            (check_has_not_color (x, y, t, hd) possible_colors dim)
+            (check_has_color (x, (y + 1) mod dim, t, hd) possible_colors dim)
+        @ develop_or_cnf
+            (check_has_not_color (x, y, t, hd) possible_colors dim)
             (check_has_color
                ((x + dim - 1) mod dim, y, t, hd)
-               possibles_colors dim)
-        @ or_cnf_dev
-            (check_has_not_color (x, y, t, hd) possibles_colors dim)
+               possible_colors dim)
+        @ develop_or_cnf
+            (check_has_not_color (x, y, t, hd) possible_colors dim)
             (check_has_color
                (x, (y + dim - 1) mod dim, t, hd)
-               possibles_colors dim)
+               possible_colors dim)
         @ check_coord_have_one_color tl
     | [] -> []
   in
-  check_coord_have_one_color possibles_colors
+  check_coord_have_one_color possible_colors
 
 let check_coloration_of_graph dim max_time nbr_colors : cnf =
   let colors = List.init nbr_colors (fun x -> x) in
@@ -101,7 +101,7 @@ let check_coloration_modification_of_graph dim time colors_list =
     else
       List.fold_left
         (fun acc color ->
-          or_cnf_dev
+          develop_or_cnf
             (check_has_not_color (width, height, time, color) colors_list dim)
             (check_has_color
                ((width + 1) mod dim, height, time + 1, color)
