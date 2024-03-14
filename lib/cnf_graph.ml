@@ -94,7 +94,7 @@ let check_coloration_of_graph dim max_time nbr_colors : cnf =
   in
   aux 0 0 0
 
-let check_good_modif_coloration_of_graph dim time colors_list =
+let check_coloration_modification_of_graph dim time colors_list =
   let rec aux height width =
     if width < 0 then aux (height - 1) dim
     else if height < 0 then []
