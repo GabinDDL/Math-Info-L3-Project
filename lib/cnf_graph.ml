@@ -21,7 +21,7 @@ let or_cnf_dev (cnf1 : cnf) (cnf2 : cnf) =
     (fun acc clause1 -> acc @ List.map (fun clause2 -> clause1 @ clause2) cnf2)
     [] cnf1
 
-let get_cnf_only_one_true (vars : string list) : cnf =
+let get_only_one_true_cnf (vars : string list) : cnf =
   let rec only_var_true (var : string) = function
     | [] -> []
     | hd :: tl ->
