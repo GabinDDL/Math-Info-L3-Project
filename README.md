@@ -87,7 +87,7 @@ n31 ... ... ... ...
 ... ... ... ... ...
 nw1 nw2 nw3 ... nwl
 ```
-With l the length of the grid, w the width and each variable n the values of the grid.
+With l the length of the grid, w the width and each variable n the color of node at the position x and y of the grid.
 
 
 ## Running the tests
