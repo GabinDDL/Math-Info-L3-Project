@@ -78,19 +78,18 @@ let check_coloration_of_one_node (x : int) (y : int) (t : int)
   in
   check_coord_have_one_color possible_colors
 
-let check_coloration_of_graph w l max_time nbr_colors : cnf =
-  let colors = List.init nbr_colors (fun x -> x) in
+let check_coloration_of_graph w l max_time possible_colors : cnf =
   let rec aux width height time =
     if width >= w then aux 0 (height + 1) time
     else if height >= l then aux 0 0 (time + 1)
     else if time >= max_time then []
     else
-      check_coloration_of_one_node width height time colors w l
+      check_coloration_of_one_node width height time possible_colors w l
       @ aux (width + 1) height time
   in
   aux 0 0 0
 
-let check_coloration_modification_of_graph w l time colors_list =
+let check_coloration_modification_of_graph w l time possible_colors =
   let rec aux width height =
     if width < 0 then aux w (height - 1)
     else if height < 0 then []
@@ -98,21 +97,61 @@ let check_coloration_modification_of_graph w l time colors_list =
       List.fold_left
         (fun acc color ->
           develop_or_cnf
-            (check_has_not_color (width, height, time, color) colors_list w l)
+            (check_has_not_color
+               (width, height, time, color)
+               possible_colors w l)
             (check_has_not_color
                ((width + 1) mod w, height, time + 1, color)
-               colors_list w l
+               possible_colors w l
             @ check_has_not_color
                 ((width + w - 1) mod w, height, time + 1, color)
-                colors_list w l
+                possible_colors w l
             @ check_has_not_color
                 (width, (height + 1) mod l, time + 1, color)
-                colors_list w l
+                possible_colors w l
             @ check_has_not_color
                 (width, (height + l - 1) mod l, time + 1, color)
-                colors_list w l)
+                possible_colors w l)
           @ acc)
-        [] colors_list
+        [] possible_colors
       @ aux (width - 1) height
   in
   aux (w - 1) (l - 1)
+
+let check_coloration_start_and_final ((l1, w1), a1) a2 max_time colors_list :
+    cnf =
+  let aux t i e =
+    List.fold_left
+      (fun acc e -> acc @ e)
+      []
+      (Array.to_list
+         (Array.mapi
+            (fun j c -> check_has_color (i, j, t, c) colors_list w1 l1)
+            e))
+  in
+  List.fold_left
+    (fun acc e -> acc @ e)
+    []
+    (Array.to_list (Array.mapi (aux 0) a1))
+  @ List.fold_left
+      (fun acc e -> acc @ e)
+      []
+      (Array.to_list (Array.mapi (aux max_time) a2))
+
+let get_cnf g1 g2 max_time nbr_colors =
+  let possible_colors = List.init nbr_colors (fun x -> x) in
+  match (g1, g2) with
+  | ((l1, w1), a1), ((l2, w2), a2) when l1 = l2 && w1 = w2 ->
+      let rec check_coloration_modification_of_graph_for_all_time t =
+        if t < 0 then []
+        else
+          check_coloration_modification_of_graph w1 l1 t possible_colors
+          @ check_coloration_modification_of_graph_for_all_time (t - 1)
+      in
+      check_coloration_start_and_final
+        ((l1, w1), a1)
+        a2 max_time possible_colors
+      @ check_coloration_modification_of_graph_for_all_time max_time
+      @ check_coloration_of_graph w1 l1 max_time possible_colors
+  | _ -> assert false
+(* check l1 = l2 && w1 = w2 *)
