@@ -4,8 +4,8 @@ open Prjt_mi_recolor.Parser
 let run_solver_on_file file file_output =
   match parse_file_for_solver file with
   | Error e -> raise e
-  | Ok ((l, w), a) -> (
-      let grid = init_toroidal_grid 0 w l a in
+  | Ok ((t, l, w), a) -> (
+      let grid = init_toroidal_grid t w l a in
       match file_output with
       | None -> pp_graph Format.std_formatter grid
       | Some output ->

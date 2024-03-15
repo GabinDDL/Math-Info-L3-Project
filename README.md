@@ -80,14 +80,14 @@ $ dune exec prjt_mi_recolor file.txt
 
 The file must be in the following format:
 ```
-l w
+t l w
 n11 n12 n13 ... n1l
 n21 n22 ... ... ...
 n31 ... ... ... ...
 ... ... ... ... ...
 nw1 nw2 nw3 ... nwl
 ```
-With l the length of the grid, w the width and each variable n the color of node at the position x and y of the grid.
+With t the maximal time, l the length of the grid, w the width and each variable n the color of node at the position x and y of the grid.
 
 
 ## Running the tests
