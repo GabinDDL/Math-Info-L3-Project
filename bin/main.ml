@@ -6,7 +6,7 @@ let run_solver_on_file file =
   match parse_file_for_solver file with
   | Error e -> raise e
   | Ok ((l, w), a) ->
-      let grid = init_toroidal_grid 0 l w a in
+      let grid = init_toroidal_grid 0 w l a in
       pp_graph Format.std_formatter grid
 (* TODO: To change with the result of SAT solver. *)
 

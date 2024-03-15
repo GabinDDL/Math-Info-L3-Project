@@ -10,7 +10,7 @@ let parse_dimension (ic : in_channel) : (int * int, exn) result =
     let l = input_line ic in
     let dim_str_list = String.split_on_char ' ' l in
     match dim_str_list with
-    | [ l; w ] -> Ok (int_of_string w, int_of_string l)
+    | [ w; l ] -> Ok (int_of_string w, int_of_string l)
     | _ -> raise Wrong_number_of_args
   with e -> Error e
 
