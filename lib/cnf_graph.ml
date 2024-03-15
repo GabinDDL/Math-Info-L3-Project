@@ -63,18 +63,18 @@ let check_coloration_of_one_node (x : int) (y : int) (t : int)
     | hd :: tl ->
         develop_or_cnf
           (check_has_not_color (x, y, t, hd) possible_colors dim)
-          (check_has_color ((x + 1) mod dim, y, t, hd) possible_colors dim)
+          (check_has_not_color ((x + 1) mod dim, y, t, hd) possible_colors dim)
         @ develop_or_cnf
             (check_has_not_color (x, y, t, hd) possible_colors dim)
-            (check_has_color (x, (y + 1) mod dim, t, hd) possible_colors dim)
+            (check_has_not_color (x, (y + 1) mod dim, t, hd) possible_colors dim)
         @ develop_or_cnf
             (check_has_not_color (x, y, t, hd) possible_colors dim)
-            (check_has_color
+            (check_has_not_color
                ((x + dim - 1) mod dim, y, t, hd)
                possible_colors dim)
         @ develop_or_cnf
             (check_has_not_color (x, y, t, hd) possible_colors dim)
-            (check_has_color
+            (check_has_not_color
                (x, (y + dim - 1) mod dim, t, hd)
                possible_colors dim)
         @ check_coord_have_one_color tl
