@@ -131,7 +131,7 @@ function build_exec_output(){
     local has_passed=0
 
     for file in $input_files; do
-        $EXEC "$TESTS_FOLDER/$INPUT_EXT/$file" > "$TESTS_FOLDER/$OUTPUT_EXT/$file" 2> /dev/null || has_passed=1 
+        $EXEC "$TESTS_FOLDER/$INPUT_EXT/$file" "$TESTS_FOLDER/$OUTPUT_EXT/$file" 2> /dev/null || has_passed=1 
  
         if [ $has_passed -eq 1 ];
         then
