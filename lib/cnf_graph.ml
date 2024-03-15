@@ -91,7 +91,7 @@ let check_coloration_of_graph w l max_time possible_colors : cnf =
 
 let check_coloration_modification_of_graph w l time possible_colors =
   let rec aux width height =
-    if width < 0 then aux w (height - 1)
+    if width < 0 then aux (w - 1) (height - 1)
     else if height < 0 then []
     else
       List.fold_left
@@ -143,7 +143,7 @@ let get_cnf g1 g2 max_time nbr_colors =
   match (g1, g2) with
   | ((l1, w1), a1), ((l2, w2), a2) when l1 = l2 && w1 = w2 ->
       let rec check_coloration_modification_of_graph_for_all_time t =
-        if t < 0 then []
+        if t <= 0 then []
         else
           check_coloration_modification_of_graph w1 l1 t possible_colors
           @ check_coloration_modification_of_graph_for_all_time (t - 1)
