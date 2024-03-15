@@ -4,13 +4,16 @@ open Prjt_mi_recolor.Parser
 let run_solver_on_file file file_output =
   match parse_file_for_solver file with
   | Error e -> raise e
-  | Ok ((t, l, w), a) -> (
-      let grid = init_toroidal_grid t w l a in
+  | Ok ((t, w, l), a_init, a_final) -> (
+      let grid_init = init_toroidal_grid 0 w l a_init in
+      let grid_final = init_toroidal_grid t w l a_final in
       match file_output with
-      | None -> pp_graph Format.std_formatter grid
+      | None -> Format.printf "%a\n\n%a" pp_graph grid_init pp_graph grid_final
       | Some output ->
           let ic = open_out output in
-          pp_graph (Format.formatter_of_out_channel ic) grid;
+          Format.fprintf
+            (Format.formatter_of_out_channel ic)
+            "%a\n\n%a" pp_graph grid_init pp_graph grid_final;
           close_out ic)
 (* TODO: To change with the result of SAT solver. *)
 
