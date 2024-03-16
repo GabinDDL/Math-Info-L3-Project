@@ -42,7 +42,7 @@ let check_has_color (x, y, t, c) (possible_colors : color list) w l : cnf =
     match colors with
     | hd :: tl ->
         [
-          (let var = get_name_variable (x, y, t, c) coef in
+          (let var = get_name_variable (x, y, t, hd) coef in
            if hd = c then (var, true) else (var, false));
         ]
         :: aux res tl
