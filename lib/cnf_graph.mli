@@ -10,12 +10,7 @@ val get_variable_value : string -> int -> bool * int * int * int * int
 val get_only_one_true_cnf : string list -> cnf
 (** Function to create a CNF that verifies that only one condition is true and the others are all false. *)
 
-val check_has_color : int * int * int * int -> color list -> int -> int -> cnf
-(** Function that generates the cnf to check if a node is colored with a specific color and not with the others. *)
-
-val check_has_not_color :
-  int * int * int * int -> color list -> int -> int -> cnf
-(** Function that generates the cnf to check if a node is not colored with a specific color and is colored with a single other. *)
+val check_each_case_has_only_one_color : int -> int -> int -> color list -> cnf
 
 val check_coloration_of_one_node :
   int -> int -> int -> color list -> int -> int -> cnf

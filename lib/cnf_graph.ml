@@ -132,25 +132,25 @@ let check_coloration_modification_of_graph w l time possible_colors =
   in
   aux (w - 1) (l - 1)
 
-let check_coloration_start_and_final ((l1, w1), a1) a2 max_time colors_list :
-    cnf =
-  let aux t i e =
-    List.fold_left
-      (fun acc e -> acc @ e)
-      []
-      (Array.to_list
-         (Array.mapi
-            (fun j c -> check_has_color (i, j, t, c) colors_list w1 l1)
-            e))
+let check_coloration_start_and_final ((w1, l1), graph1) graph2 max_time : cnf =
+  let coef = Int.max w1 l1 in
+  let rec get_all_clause x t graph is_second_graph : cnf =
+    match graph with
+    | hd :: tl ->
+        let rec get_clause_for_line y colors_list : cnf =
+          match colors_list with
+          | fst_color :: other_color ->
+              [ (get_name_variable (x, y, t, fst_color) coef, true) ]
+              :: get_clause_for_line (y + 1) other_color
+          | [] ->
+              assert (y = w1 - 1);
+              get_all_clause (x + 1) t tl is_second_graph
+        in
+        get_clause_for_line 0 hd
+    | [] when is_second_graph -> []
+    | [] -> get_all_clause w1 max_time graph2 true
   in
-  List.fold_left
-    (fun acc e -> acc @ e)
-    []
-    (Array.to_list (Array.mapi (aux 0) a1))
-  @ List.fold_left
-      (fun acc e -> acc @ e)
-      []
-      (Array.to_list (Array.mapi (aux max_time) a2))
+  get_all_clause 0 0 graph1 false
 
 let get_cnf g1 g2 max_time nbr_colors =
   let possible_colors = List.init nbr_colors (fun x -> x) in
@@ -163,9 +163,7 @@ let get_cnf g1 g2 max_time nbr_colors =
           @ check_coloration_modification_of_graph_for_all_time (t - 1)
       in
       check_each_case_has_only_one_color max_time w1 l1 possible_colors
-      @check_coloration_start_and_final
-        ((l1, w1), a1)
-        a2 max_time possible_colors
+      @ check_coloration_start_and_final ((w1, l1), a1) a2 max_time
       @ check_coloration_modification_of_graph_for_all_time max_time
       @ check_coloration_of_graph w1 l1 max_time possible_colors
   | _ -> assert false
