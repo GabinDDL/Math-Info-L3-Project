@@ -101,29 +101,31 @@ let check_coloration_of_graph w l max_time possible_colors : cnf =
   aux 0 0 0
 
 let check_coloration_modification_of_graph w l time possible_colors =
+  let coef = Int.max w l in
   let rec aux width height =
     if width < 0 then aux (w - 1) (height - 1)
     else if height < 0 then []
     else
       List.fold_left
         (fun acc color ->
-          develop_or_cnf
-            (check_has_not_color
-               (width, height, time, color)
-               possible_colors w l)
-            (check_has_not_color
-               ((width + 1) mod w, height, time + 1, color)
-               possible_colors w l
-            @ check_has_not_color
-                ((width + w - 1) mod w, height, time + 1, color)
-                possible_colors w l
-            @ check_has_not_color
-                (width, (height + 1) mod l, time + 1, color)
-                possible_colors w l
-            @ check_has_not_color
-                (width, (height + l - 1) mod l, time + 1, color)
-                possible_colors w l)
-          @ acc)
+
+          [
+          (get_name_variable (width, height, time, color) coef, false);
+          (get_name_variable ((width + 1) mod w, height, time + 1, color) coef, false);
+        ] ::
+        [
+          (get_name_variable (width, height, time, color) coef, false);
+          (get_name_variable ((width + w - 1) mod w, height, time + 1, color) coef, false);
+        ] ::
+        [
+          (get_name_variable (width, height, time, color) coef, false);
+          (get_name_variable (width, (height + 1) mod l, time + 1, color) coef, false);
+        ] ::
+        [
+          (get_name_variable (width, height, time, color) coef, false);
+          (get_name_variable (width, (height + l - 1) mod l, time + 1, color) coef, false);
+        ] ::
+          acc)
         [] possible_colors
       @ aux (width - 1) height
   in
