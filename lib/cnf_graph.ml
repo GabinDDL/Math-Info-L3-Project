@@ -23,18 +23,22 @@ let develop_or_cnf (cnf1 : cnf) (cnf2 : cnf) =
     [] cnf1
 
 let get_only_one_true_cnf (vars : string list) : cnf =
-  let rec only_var_true (var : string) = function
-    | [] -> []
-    | hd :: tl ->
-        [ (if var = hd then (var, true) else (hd, false)) ]
-        :: only_var_true var tl
+  let rec get_all_two_tuple_at_less_was_false (cnf : cnf) = function
+    | [] -> cnf
+    | hd1 :: tl1 -> (
+        match tl1 with
+        | [] -> []
+        | hd2 :: tl2 ->
+            get_all_two_tuple_at_less_was_false
+              ([ (hd1, false); (hd2, false) ]
+              :: get_all_two_tuple_at_less_was_false cnf tl2)
+              tl1)
   in
-  let rec generate_exprs = function
+  let rec at_less_one_true = function
     | [] -> []
-    | hd :: tl when tl = [] -> only_var_true hd vars
-    | hd :: tl -> develop_or_cnf (only_var_true hd vars) (generate_exprs tl)
+    | hd :: tl -> (hd, true) :: at_less_one_true tl
   in
-  generate_exprs vars
+  at_less_one_true vars :: get_all_two_tuple_at_less_was_false [] vars
 
 let check_has_color (x, y, t, c) (possible_colors : color list) w l : cnf =
   let coef = Int.max w l in
