@@ -35,27 +35,24 @@ let get_only_one_true_cnf (vars : string list) : cnf =
   in
   at_less_one_true vars :: get_all_two_tuple_at_less_was_false [] vars
 
-let check_has_color (x, y, t, c) (possible_colors : color list) w l : cnf =
+let check_each_case_has_only_one_color max_time w l
+    (possible_colors : color list) : cnf =
   let coef = Int.max w l in
-  let rec aux res colors =
-    match colors with
-    | hd :: tl ->
-        [
-          (let var = get_name_variable (x, y, t, hd) coef in
-           if hd = c then (var, true) else (var, false));
-        ]
-        :: aux res tl
-    | [] -> []
+  let rec get_all_var time width length : cnf =
+    if time < 0 then []
+    else if width < 0 then get_all_var time w (length - 1)
+    else if length < 0 then get_all_var (time - 1) w l
+    else
+      let rec get_all_color colors =
+        match colors with
+        | hd :: tl ->
+            get_name_variable (width, length, time, hd) coef :: get_all_color tl
+        | [] -> []
+      in
+      get_only_one_true_cnf (get_all_color possible_colors)
+      @ get_all_var time (width + 1) length
   in
-  aux [] possible_colors
-
-let check_has_not_color (x, y, t, c) possible_colors w l : cnf =
-  let coef = Int.max w l in
-  [ (get_name_variable (x, y, t, c) coef, false) ]
-  :: get_only_one_true_cnf
-       (List.map
-          (fun color -> get_name_variable (x, y, t, color) coef)
-          possible_colors)
+  get_all_var (max_time - 1) (w - 1) (l - 1)
 
 let check_coloration_of_one_node (x : int) (y : int) (t : int)
     (possible_colors : color list) w l : cnf =
@@ -165,7 +162,8 @@ let get_cnf g1 g2 max_time nbr_colors =
           check_coloration_modification_of_graph w1 l1 t possible_colors
           @ check_coloration_modification_of_graph_for_all_time (t - 1)
       in
-      check_coloration_start_and_final
+      check_each_case_has_only_one_color max_time w1 l1 possible_colors
+      @check_coloration_start_and_final
         ((l1, w1), a1)
         a2 max_time possible_colors
       @ check_coloration_modification_of_graph_for_all_time max_time
