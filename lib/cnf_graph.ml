@@ -64,20 +64,27 @@ let check_has_not_color (x, y, t, c) possible_colors w l : cnf =
 
 let check_coloration_of_one_node (x : int) (y : int) (t : int)
     (possible_colors : color list) w l : cnf =
+  let coef = Int.max w l in
   let rec check_coord_have_one_color colors =
     match colors with
     | hd :: tl ->
-        develop_or_cnf
-          (check_has_not_color (x, y, t, hd) possible_colors w l)
-          (check_has_not_color ((x + 1) mod w, y, t, hd) possible_colors w l
-          @ check_has_not_color (x, (y + 1) mod l, t, hd) possible_colors w l
-          @ check_has_not_color
-              ((x + w - 1) mod w, y, t, hd)
-              possible_colors w l
-          @ check_has_not_color
-              (x, (y + l - 1) mod l, t, hd)
-              possible_colors w l)
-        @ check_coord_have_one_color tl
+        [
+          (get_name_variable (x, y, t, hd) coef, false);
+          (get_name_variable ((x + 1) mod w, y, t, hd) coef, false);
+        ]
+        :: [
+             (get_name_variable (x, y, t, hd) coef, false);
+             (get_name_variable (x, (y + 1) mod l, t, hd) coef, false);
+           ]
+        :: [
+             (get_name_variable (x, y, t, hd) coef, false);
+             (get_name_variable ((x + w - 1) mod w, y, t, hd) coef, false);
+           ]
+        :: [
+             (get_name_variable (x, y, t, hd) coef, false);
+             (get_name_variable (x, (y + l - 1) mod l, t, hd) coef, false);
+           ]
+        :: check_coord_have_one_color tl
     | [] -> []
   in
   check_coord_have_one_color possible_colors
