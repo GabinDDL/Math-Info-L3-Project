@@ -17,11 +17,6 @@ let get_variable_value var coef =
   let x = x mod coef in
   (not, x, y, t, c)
 
-let develop_or_cnf (cnf1 : cnf) (cnf2 : cnf) =
-  List.fold_left
-    (fun acc clause1 -> acc @ List.map (fun clause2 -> clause1 @ clause2) cnf2)
-    [] cnf1
-
 let get_only_one_true_cnf (vars : string list) : cnf =
   let rec get_all_two_tuple_at_less_was_false (cnf : cnf) = function
     | [] -> cnf
@@ -108,24 +103,33 @@ let check_coloration_modification_of_graph w l time possible_colors =
     else
       List.fold_left
         (fun acc color ->
-
           [
-          (get_name_variable (width, height, time, color) coef, false);
-          (get_name_variable ((width + 1) mod w, height, time + 1, color) coef, false);
-        ] ::
-        [
-          (get_name_variable (width, height, time, color) coef, false);
-          (get_name_variable ((width + w - 1) mod w, height, time + 1, color) coef, false);
-        ] ::
-        [
-          (get_name_variable (width, height, time, color) coef, false);
-          (get_name_variable (width, (height + 1) mod l, time + 1, color) coef, false);
-        ] ::
-        [
-          (get_name_variable (width, height, time, color) coef, false);
-          (get_name_variable (width, (height + l - 1) mod l, time + 1, color) coef, false);
-        ] ::
-          acc)
+            (get_name_variable (width, height, time, color) coef, false);
+            ( get_name_variable ((width + 1) mod w, height, time + 1, color) coef,
+              false );
+          ]
+          :: [
+               (get_name_variable (width, height, time, color) coef, false);
+               ( get_name_variable
+                   ((width + w - 1) mod w, height, time + 1, color)
+                   coef,
+                 false );
+             ]
+          :: [
+               (get_name_variable (width, height, time, color) coef, false);
+               ( get_name_variable
+                   (width, (height + 1) mod l, time + 1, color)
+                   coef,
+                 false );
+             ]
+          :: [
+               (get_name_variable (width, height, time, color) coef, false);
+               ( get_name_variable
+                   (width, (height + l - 1) mod l, time + 1, color)
+                   coef,
+                 false );
+             ]
+          :: acc)
         [] possible_colors
       @ aux (width - 1) height
   in
