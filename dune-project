@@ -17,7 +17,7 @@
  (name prjt_mi_recolor)
  (synopsis "A project about recoloration in graph")
  (description "This project concern a L3 Maths and CS UE, which is about recoloration")
- (depends ocaml dune (alcotest :with-test))
+ (depends ocaml dune (alcotest :with-test) msat)
  (tags
   ("ocaml" "recoloration" "graph")))
 

@@ -11,6 +11,7 @@ depends: [
   "ocaml"
   "dune" {>= "3.11"}
   "alcotest" {with-test}
+  "msat"
   "odoc" {with-doc}
 ]
 build: [
