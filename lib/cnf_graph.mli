@@ -1,5 +1,4 @@
 open Graph
-
 module Sat = Msat_sat
 module Element = Sat.Int_lit (* expressions *)
 
@@ -10,8 +9,8 @@ type cnf = clause list
 val create_solver : unit -> Sat.solver
 (** Create solver module *)
 
-(** Create an literal with a node value *)
 val int_to_literal : int -> literal
+(** Create an literal with a node value *)
 
 (** Get the negation of a literal *)
 val get_negation_of : literal -> literal

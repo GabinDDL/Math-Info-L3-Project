@@ -9,7 +9,7 @@ type cnf = clause list
 (** Create an element with a node value *)
 let int_to_literal (value : int) : literal = Element.make value
 
-let literal_to_int (e : literal) = (Element.to_int e) / 2
+let literal_to_int (e : literal) = Element.to_int e / 2
 
 let pp_literal (fmt : Format.formatter) (e : literal) =
   Format.fprintf fmt "%d" (literal_to_int e)
@@ -36,8 +36,9 @@ let get_result (solver : Sat.solver) : Sat.res = Sat.solve solver
 
 let pp_res_solved (fmt : Format.formatter) (res : Sat.res) =
   match res with
-  | Sat.Unsat _ -> Format.fprintf fmt "unsat"
-  | Sat.Sat _ -> Format.fprintf fmt "sat"
+  | Sat.Unsat _ -> Format.fprintf fmt "unsat\n"
+  | Sat.Sat _ ->
+      Format.fprintf fmt "sat\n"
 
 let get_name_variable (x, y, t, c) dim =
   x + (y * dim) + (t * dim * dim) + (c * dim * dim * dim)
