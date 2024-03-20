@@ -82,10 +82,7 @@ let init_toroidal_grid t w l a =
     let v = (pos, t, c) in
     let v_and_neighbors = (v, get_neighbors_toroidal_grid t w l x y a) in
     if x = 0 && y = 0 then
-      {
-        nb_vertex = w * l;
-        vertex_with_neighbors = v_and_neighbors :: lst;
-      }
+      { nb_vertex = w * l; vertex_with_neighbors = v_and_neighbors :: lst }
     else if x = 0 then aux_init_grid (v_and_neighbors :: lst) (l - 1) (y - 1)
     else aux_init_grid (v_and_neighbors :: lst) (x - 1) y
   in

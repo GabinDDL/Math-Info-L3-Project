@@ -7,20 +7,21 @@ type literal = Element.t
 type clause = literal list
 type cnf = clause list
 
-(** Create solver module *)
 val create_solver : unit -> Sat.solver
+(** Create solver module *)
 
 (** Create an literal with a node value *)
 val int_to_literal : int -> literal
 
 (** Get the negation of a literal *)
 val get_negation_of : literal -> literal
+(** Get the negation of an element *)
 
+val add_clauses : Sat.solver -> literal list list -> unit
 (** Add list of clauses to the solver  *)
-val add_clauses : Sat.solver -> literal list list -> unit 
 
-(** Get the results of the CNF *)
 val get_result : Sat.solver -> Sat.res
+(** Get the results of the CNF *)
 
 val pp_res_solved : Format.formatter -> Sat.res -> unit
 
