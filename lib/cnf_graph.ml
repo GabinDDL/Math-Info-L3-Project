@@ -50,7 +50,7 @@ let check_each_case_has_only_one_color max_time w l
         | [] -> []
       in
       get_only_one_true_cnf (get_all_color possible_colors)
-      @ get_all_var time (width + 1) length
+      @ get_all_var time (width - 1) length
   in
   get_all_var (max_time - 1) (w - 1) (l - 1)
 
@@ -133,22 +133,26 @@ let check_coloration_modification_of_graph w l time possible_colors =
   aux (w - 1) (l - 1)
 
 let check_coloration_start_and_final ((w1, l1), graph1) graph2 max_time : cnf =
+  let graph1 = Array.to_list graph1 in
+  let graph2 = Array.to_list graph2 in
   let coef = Int.max w1 l1 in
-  let rec get_all_clause x t graph is_second_graph : cnf =
+  let rec get_all_clause y t graph is_second_graph : cnf =
     match graph with
     | hd :: tl ->
-        let rec get_clause_for_line y colors_list : cnf =
-          match colors_list with
+        let rec get_clause_for_line x hd : cnf =
+          match hd with
           | fst_color :: other_color ->
               [ (get_name_variable (x, y, t, fst_color) coef, true) ]
-              :: get_clause_for_line (y + 1) other_color
+              :: get_clause_for_line (x + 1) other_color
           | [] ->
-              assert (y = w1 - 1);
-              get_all_clause (x + 1) t tl is_second_graph
+              assert (x = w1);
+              get_all_clause (y + 1) t tl is_second_graph
         in
-        get_clause_for_line 0 hd
+        get_clause_for_line 0 (Array.to_list hd)
     | [] when is_second_graph -> []
-    | [] -> get_all_clause w1 max_time graph2 true
+    | [] ->
+        assert (y = l1);
+        get_all_clause 0 max_time graph2 true
   in
   get_all_clause 0 0 graph1 false
 
