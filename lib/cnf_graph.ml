@@ -6,13 +6,23 @@ type literal = Element.t
 type clause = literal list
 type cnf = clause list
 
-(** Create solver module *)
-let create_solver () : Sat.solver = Sat.create ()
-
 (** Create an element with a node value *)
 let int_to_literal (value : int) : literal = Element.make value
 
 let literal_to_int (e : literal) = (Element.to_int e) / 2
+
+let pp_literal (fmt : Format.formatter) (e : literal) =
+  Format.fprintf fmt "%d" (literal_to_int e)
+
+let pp_cnf fmt (c : cnf) =
+  List.iter
+    (fun lst ->
+      List.iter (fun e -> Format.fprintf fmt "%a " pp_literal e) lst;
+      Format.fprintf fmt "\n")
+    c
+
+(** Create solver module *)
+let create_solver () : Sat.solver = Sat.create ()
 
 (** Get the negation of an element *)
 let get_negation_of (elem : literal) : literal = Element.neg elem
@@ -146,13 +156,3 @@ let check_coloration_modification_of_graph dim time colors_list =
       @ aux height (width - 1)
   in
   aux (dim - 1) (dim - 1)
-
-let pp_element (fmt : Format.formatter) (e : literal) =
-  Format.fprintf fmt "%d" (literal_to_int e)
-
-let pp_cnf fmt (c : cnf) =
-  List.iter
-    (fun lst ->
-      List.iter (fun e -> Format.fprintf fmt "%a " pp_element e) lst;
-      Format.fprintf fmt "\n")
-    c
