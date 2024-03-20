@@ -1,4 +1,4 @@
 (executable
  (public_name prjt_mi_recolor)
  (name main)
- (libraries prjt_mi_recolor msat msat.sat))
+ (libraries prjt_mi_recolor))
