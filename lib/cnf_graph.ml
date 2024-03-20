@@ -34,17 +34,11 @@ let add_clauses (solver : Sat.solver) (lst : literal list list) : unit =
 (** Get the results of the CNF *)
 let get_result (solver : Sat.solver) : Sat.res = Sat.solve solver
 
-let pp_res_solved (fmt : Format.formatter) (res : Sat.res) =
-  match res with
-  | Sat.Unsat _ -> Format.fprintf fmt "unsat\n"
-  | Sat.Sat _ ->
-      Format.fprintf fmt "sat\n"
-
 let get_name_variable (x, y, t, c) dim =
-  x + (y * dim) + (t * dim * dim) + (c * dim * dim * dim)
+  x + (y * dim) + (t * dim * dim) + (c * dim * dim * dim) + 1
 
 let get_variable_value var dim =
-  let x = var in
+  let x = var - 1 in
   let not = x < 0 in
   let x = if not then -x else x in
   let c = x / (dim * dim * dim) in
@@ -54,6 +48,28 @@ let get_variable_value var dim =
   let y = x / dim in
   let x = x mod dim in
   (not, x, y, t, c)
+
+let pp_res_solved (fmt : Format.formatter) (res : Sat.res) =
+  match res with
+  | Sat.Unsat _ -> Format.fprintf fmt "unsat\n"
+  | Sat.Sat _ -> Format.fprintf fmt "sat\n"
+
+let pp_sat (fmt : Format.formatter) (res : Sat.res)
+    ((t_m, w, l, c_m) : int * int * int * int) dim =
+  match res with
+  | Sat.Sat a ->
+      let rec print_res t x y c =
+        if t > t_m then ()
+        else if c > c_m then print_res t x (y + 1) 0
+        else if y > l then print_res t (x + 1) 0 c
+        else if x > w then print_res (t + 1) 0 y c
+        else (
+          Format.fprintf fmt "%d %d %d %d : %b\n" x y t c
+            (a.eval (int_to_literal (get_name_variable (x, y, t, c) dim)));
+          print_res t x y (c + 1))
+      in
+      print_res 0 0 0 0
+  | _ -> ()
 
 let develop_or_cnf (cnf1 : cnf) (cnf2 : cnf) =
   List.fold_left

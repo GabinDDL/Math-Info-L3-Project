@@ -24,6 +24,8 @@ val get_result : Sat.solver -> Sat.res
 
 val pp_res_solved : Format.formatter -> Sat.res -> unit
 
+val pp_sat : Format.formatter -> Sat.res -> (int * int * int * int)-> int -> unit
+
 val get_name_variable : int * int * int * int -> int -> int
 (** Bijective function that converts a quadruplet into an integer. *)
 
