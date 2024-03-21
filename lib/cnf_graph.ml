@@ -50,12 +50,11 @@ let pp_var dim fmt var =
 let pp_literal dim (fmt : Format.formatter) (e : literal) =
   Format.fprintf fmt "%a" (pp_var dim) (literal_to_int e)
 
+let pp_clause dim fmt (c : clause) =
+  List.iter (fun e -> Format.fprintf fmt "%a; " (pp_literal dim) e) c
+
 let pp_cnf dim fmt (c : cnf) =
-  List.iter
-    (fun lst ->
-      List.iter (fun e -> Format.fprintf fmt "%a; " (pp_literal dim) e) lst;
-      Format.fprintf fmt "\n")
-    c
+  List.iter (fun cl -> Format.fprintf fmt "%a\n" (pp_clause dim) cl) c
 
 let pp_res_solved (fmt : Format.formatter) (res : Sat.res) =
   match res with
