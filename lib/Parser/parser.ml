@@ -26,10 +26,9 @@ let parse_file_to_array (ic : in_channel) ((w, l, c) : int * int * int) :
     else
       try
         let l = parse_argument_line_to_array (input_line ic) in
-        if Array.length l <> w
-        then raise Wrong_width_of_array
-        else if (Array.exists (fun n -> n < 0 || n > c) l)
-        then raise Wrong_color_number
+        if Array.length l <> w then raise Wrong_width_of_array
+        else if Array.exists (fun n -> n < 0 || n > c) l then
+          raise Wrong_color_number
         else obtain_lines (l :: acc) (i + 1)
       with e -> Error e
   in
