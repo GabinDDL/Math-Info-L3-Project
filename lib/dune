@@ -1,4 +1,3 @@
-(include_subdirs qualified)
-
 (library
- (name prjt_mi_recolor))
+ (name prjt_mi_recolor)
+ (libraries msat msat.sat))

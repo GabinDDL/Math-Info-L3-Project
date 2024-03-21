@@ -1,11 +1,44 @@
-open SAT_Solver.Cnf
 open Graph
+module Sat = Msat_sat
+module Element = Sat.Int_lit (* expressions *)
+
+type literal = Element.t
+type clause = literal list
+type cnf = clause list
+
+(** Create an element with a node value *)
+let int_to_literal (value : int) : literal = Element.make value
+
+let literal_to_int (e : literal) = Element.to_int e / 2
+
+let pp_literal (fmt : Format.formatter) (e : literal) =
+  Format.fprintf fmt "%d" (literal_to_int e)
+
+let pp_cnf fmt (c : cnf) =
+  List.iter
+    (fun lst ->
+      List.iter (fun e -> Format.fprintf fmt "%a " pp_literal e) lst;
+      Format.fprintf fmt "\n")
+    c
+
+(** Create solver module *)
+let create_solver () : Sat.solver = Sat.create ()
+
+(** Get the negation of an element *)
+let get_negation_of (elem : literal) : literal = Element.neg elem
+
+(** Add list of clauses to the solver  *)
+let add_clauses (solver : Sat.solver) (lst : literal list list) : unit =
+  Sat.assume solver lst ()
+
+(** Get the results of the CNF *)
+let get_result (solver : Sat.solver) : Sat.res = Sat.solve solver
 
 let get_name_variable (x, y, t, c) dim =
-  Printf.sprintf "%i" (x + (y * dim) + (t * dim * dim) + (c * dim * dim * dim))
+  x + (y * dim) + (t * dim * dim) + (c * dim * dim * dim) + 1
 
 let get_variable_value var dim =
-  let x = int_of_string var in
+  let x = var - 1 in
   let not = x < 0 in
   let x = if not then -x else x in
   let c = x / (dim * dim * dim) in
@@ -16,16 +49,41 @@ let get_variable_value var dim =
   let x = x mod dim in
   (not, x, y, t, c)
 
+let pp_res_solved (fmt : Format.formatter) (res : Sat.res) =
+  match res with
+  | Sat.Unsat _ -> Format.fprintf fmt "unsat\n"
+  | Sat.Sat _ -> Format.fprintf fmt "sat\n"
+
+let pp_sat (fmt : Format.formatter) (res : Sat.res)
+    ((t_m, w, l, c_m) : int * int * int * int) dim =
+  match res with
+  | Sat.Sat a ->
+      let rec print_res t x y c =
+        if t > t_m then ()
+        else if c > c_m then print_res t x (y + 1) 0
+        else if y > l then print_res t (x + 1) 0 c
+        else if x > w then print_res (t + 1) 0 y c
+        else (
+          Format.fprintf fmt "%d %d %d %d : %b\n" x y t c
+            (a.eval (int_to_literal (get_name_variable (x, y, t, c) dim)));
+          print_res t x y (c + 1))
+      in
+      print_res 0 0 0 0
+  | _ -> ()
+
 let develop_or_cnf (cnf1 : cnf) (cnf2 : cnf) =
   List.fold_left
     (fun acc clause1 -> acc @ List.map (fun clause2 -> clause1 @ clause2) cnf2)
     [] cnf1
 
-let get_only_one_true_cnf (vars : string list) : cnf =
-  let rec only_var_true (var : string) = function
+let get_only_one_true_cnf (vars : int list) : cnf =
+  let rec only_var_true (var : int) = function
     | [] -> []
     | hd :: tl ->
-        [ (if var = hd then (var, true) else (hd, false)) ]
+        [
+          (if var = hd then var |> int_to_literal
+           else hd |> int_to_literal |> get_negation_of);
+        ]
         :: only_var_true var tl
   in
   let rec generate_exprs = function
@@ -42,7 +100,8 @@ let check_has_color (x, y, t, c) (possible_colors : color list) (dim : int) :
     | hd :: tl ->
         [
           (let var = get_name_variable (x, y, t, c) dim in
-           if hd = c then (var, true) else (var, false));
+           if hd = c then var |> int_to_literal
+           else var |> int_to_literal |> get_negation_of);
         ]
         :: aux res tl
     | [] -> []
@@ -50,7 +109,7 @@ let check_has_color (x, y, t, c) (possible_colors : color list) (dim : int) :
   aux [] possible_colors
 
 let check_has_not_color (x, y, t, c) possible_colors dim : cnf =
-  [ (get_name_variable (x, y, t, c) dim, false) ]
+  [ get_name_variable (x, y, t, c) dim |> int_to_literal |> get_negation_of ]
   :: get_only_one_true_cnf
        (List.map
           (fun color -> get_name_variable (x, y, t, color) dim)
