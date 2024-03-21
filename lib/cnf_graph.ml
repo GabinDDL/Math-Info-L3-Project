@@ -54,48 +54,55 @@ let check_each_case_has_only_one_color max_time w l
   in
   get_all_var (max_time - 1) (w - 1) (l - 1)
 
-let check_coloration_of_one_node (x : int) (y : int) (t : int)
-    (possible_colors : color list) w l : cnf =
-  let coef = Int.max w l in
-  let rec check_coord_have_one_color colors =
-    match colors with
-    | hd :: tl ->
-        [
-          (get_name_variable (x, y, t, hd) coef, false);
-          (get_name_variable ((x + 1) mod w, y, t, hd) coef, false);
-        ]
-        :: [
-             (get_name_variable (x, y, t, hd) coef, false);
-             (get_name_variable (x, (y + 1) mod l, t, hd) coef, false);
-           ]
-        :: [
-             (get_name_variable (x, y, t, hd) coef, false);
-             (get_name_variable ((x + w - 1) mod w, y, t, hd) coef, false);
-           ]
-        :: [
-             (get_name_variable (x, y, t, hd) coef, false);
-             (get_name_variable (x, (y + l - 1) mod l, t, hd) coef, false);
-           ]
-        :: check_coord_have_one_color tl
-    | [] -> []
+let check_coloration_of_each_neighbor_is_different_for_each_node_of_the_graph w
+    l max_time possible_colors : cnf =
+  let check_coloration_of_each_neighbor_is_different_for_one_node (x : int)
+      (y : int) (t : int) (possible_colors : color list) w l : cnf =
+    let coef = Int.max w l in
+    let rec check_coord_have_one_color colors =
+      match colors with
+      | hd :: tl ->
+          [
+            (get_name_variable (x, y, t, hd) coef, false);
+            (get_name_variable ((x + 1) mod w, y, t, hd) coef, false);
+          ]
+          :: [
+               (get_name_variable (x, y, t, hd) coef, false);
+               (get_name_variable (x, (y + 1) mod l, t, hd) coef, false);
+             ]
+          :: [
+               (get_name_variable (x, y, t, hd) coef, false);
+               (get_name_variable ((x + w - 1) mod w, y, t, hd) coef, false);
+             ]
+          :: [
+               (get_name_variable (x, y, t, hd) coef, false);
+               (get_name_variable (x, (y + l - 1) mod l, t, hd) coef, false);
+             ]
+          :: check_coord_have_one_color tl
+      | [] -> []
+    in
+    check_coord_have_one_color possible_colors
   in
-  check_coord_have_one_color possible_colors
-
-let check_coloration_of_graph w l max_time possible_colors : cnf =
-  let rec aux width height time =
-    if width >= w then aux 0 (height + 1) time
-    else if height >= l then aux 0 0 (time + 1)
+  let rec check_coloration_of_each_node_each_time width height time =
+    if width >= w then
+      check_coloration_of_each_node_each_time 0 (height + 1) time
+    else if height >= l then
+      check_coloration_of_each_node_each_time 0 0 (time + 1)
     else if time >= max_time then []
     else
-      check_coloration_of_one_node width height time possible_colors w l
-      @ aux (width + 1) height time
+      check_coloration_of_each_neighbor_is_different_for_one_node width height
+        time possible_colors w l
+      @ check_coloration_of_each_node_each_time (width + 1) height time
   in
-  aux 0 0 0
+  check_coloration_of_each_node_each_time 0 0 0
 
-let check_coloration_modification_of_graph w l time possible_colors =
+let check_coloration_after_modification_of_graph w l time possible_colors =
   let coef = Int.max w l in
-  let rec aux width height =
-    if width < 0 then aux (w - 1) (height - 1)
+  let rec get_cnf_check_coloration_after_modification_fro_each_node width height
+      =
+    if width < 0 then
+      get_cnf_check_coloration_after_modification_fro_each_node (w - 1)
+        (height - 1)
     else if height < 0 then []
     else
       List.fold_left
@@ -128,9 +135,10 @@ let check_coloration_modification_of_graph w l time possible_colors =
              ]
           :: acc)
         [] possible_colors
-      @ aux (width - 1) height
+      @ get_cnf_check_coloration_after_modification_fro_each_node (width - 1)
+          height
   in
-  aux (w - 1) (l - 1)
+  get_cnf_check_coloration_after_modification_fro_each_node (w - 1) (l - 1)
 
 let check_coloration_start_and_final ((w1, l1), graph1) graph2 max_time : cnf =
   let graph1 = Array.to_list graph1 in
@@ -160,15 +168,18 @@ let get_cnf g1 g2 max_time nbr_colors =
   let possible_colors = List.init nbr_colors (fun x -> x) in
   match (g1, g2) with
   | ((l1, w1), a1), ((l2, w2), a2) when l1 = l2 && w1 = w2 ->
-      let rec check_coloration_modification_of_graph_for_all_time t =
+      let rec check_coloration_after_modification_of_graph_for_all_time t =
         if t <= 0 then []
         else
-          check_coloration_modification_of_graph w1 l1 t possible_colors
-          @ check_coloration_modification_of_graph_for_all_time (t - 1)
+          check_coloration_after_modification_of_graph w1 l1 t possible_colors
+          @ check_coloration_after_modification_of_graph_for_all_time (t - 1)
       in
       check_each_case_has_only_one_color max_time w1 l1 possible_colors
       @ check_coloration_start_and_final ((w1, l1), a1) a2 max_time
-      @ check_coloration_modification_of_graph_for_all_time max_time
-      @ check_coloration_of_graph w1 l1 max_time possible_colors
-  | _ -> assert false
-(* check l1 = l2 && w1 = w2 *)
+      @ check_coloration_after_modification_of_graph_for_all_time max_time
+      @ check_coloration_of_each_neighbor_is_different_for_each_node_of_the_graph
+          w1 l1 max_time possible_colors
+  | ((l1, w1), _), ((l2, w2), _) ->
+      assert (l1 = l2 && w1 = w2);
+      []
+(*never return this list*)
