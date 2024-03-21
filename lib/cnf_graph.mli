@@ -23,7 +23,10 @@ val get_result : Sat.solver -> Sat.res
 (** Get the results of the CNF *)
 
 val pp_res_solved : Format.formatter -> Sat.res -> unit
-val pp_sat : Format.formatter -> Sat.res -> int * int * int * int -> int -> unit
+val pp_sat : int * int * int * int -> int -> Format.formatter -> Sat.res -> unit
+
+val pp_toroidal_grid_recoloration_solution :
+  int * int * int * int -> int -> Format.formatter -> Sat.res -> unit
 
 val get_name_variable : int * int * int * int -> int -> int
 (** Bijective function that converts a quadruplet into an integer. *)
