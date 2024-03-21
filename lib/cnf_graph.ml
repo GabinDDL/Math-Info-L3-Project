@@ -11,16 +11,6 @@ let int_to_literal (value : int) : literal = Element.make value
 
 let literal_to_int (e : literal) = Element.to_int e / 2
 
-let pp_literal (fmt : Format.formatter) (e : literal) =
-  Format.fprintf fmt "%d" (literal_to_int e)
-
-let pp_cnf fmt (c : cnf) =
-  List.iter
-    (fun lst ->
-      List.iter (fun e -> Format.fprintf fmt "%a " pp_literal e) lst;
-      Format.fprintf fmt "\n")
-    c
-
 (** Create solver module *)
 let create_solver () : Sat.solver = Sat.create ()
 
@@ -51,6 +41,21 @@ let get_variable_value var max_param =
   let y = x / max_param in
   let x = x mod max_param in
   (not, x, y, t, c)
+
+let pp_var dim fmt var =
+  let not, x, y, t, c = get_variable_value var dim in
+  if not then Format.fprintf fmt "not (%d, %d, %d, %d)" x y t c
+  else Format.fprintf fmt "(%d, %d, %d, %d)" x y t c
+
+let pp_literal dim (fmt : Format.formatter) (e : literal) =
+  Format.fprintf fmt "%a" (pp_var dim) (literal_to_int e)
+
+let pp_cnf dim fmt (c : cnf) =
+  List.iter
+    (fun lst ->
+      List.iter (fun e -> Format.fprintf fmt "%a; " (pp_literal dim) e) lst;
+      Format.fprintf fmt "\n")
+    c
 
 let pp_res_solved (fmt : Format.formatter) (res : Sat.res) =
   match res with
