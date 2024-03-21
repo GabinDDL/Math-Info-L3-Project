@@ -61,8 +61,8 @@ let pp_res_solved (fmt : Format.formatter) (res : Sat.res) =
   | Sat.Unsat _ -> Format.fprintf fmt "unsat\n"
   | Sat.Sat _ -> Format.fprintf fmt "sat\n"
 
-let pp_sat (fmt : Format.formatter) (res : Sat.res)
-    ((t_m, w, l, c_m) : int * int * int * int) max_param =
+let pp_sat ((t_m, w, l, c_m) : int * int * int * int) (max_param : int)
+    (fmt : Format.formatter) (res : Sat.res) =
   match res with
   | Sat.Sat a ->
       let rec print_res t x y c =
@@ -77,6 +77,47 @@ let pp_sat (fmt : Format.formatter) (res : Sat.res)
       in
       print_res 0 0 0 0
   | _ -> ()
+
+exception Incorrect_Answer
+
+let pp_toroidal_grid_recoloration_at_time
+    ((t, w, l, c_m) : int * int * int * int) (dim : int)
+    (fmt : Format.formatter) (res : Sat.res) =
+  match res with
+  | Sat.Sat a ->
+      let rec print_time_grid x y c =
+        if y >= l then ()
+        else if x >= w then (
+          Format.fprintf fmt "\n";
+          print_time_grid 0 (y + 1) c_m)
+        else if c >= c_m then raise Incorrect_Answer
+        else if a.eval (int_to_literal (get_name_variable (x, y, t, c) dim))
+        then (
+          Format.fprintf fmt "%d " c;
+          print_time_grid (x + 1) y 0)
+        else print_time_grid x y (c + 1)
+      in
+
+      Format.fprintf fmt "Time %d :\n" t;
+      print_time_grid 0 0 0
+  | _ -> ()
+
+let pp_toroidal_grid_recoloration_solution (t_m, w, l, c_m) dim
+    (fmt : Format.formatter) (res : Sat.res) =
+  let rec print_all_time_grid t =
+    if t >= t_m then ()
+    else
+      Format.fprintf fmt "%a\n"
+        (pp_toroidal_grid_recoloration_at_time (t, w, l, c_m) dim)
+        res;
+    print_all_time_grid (t + 1)
+  in
+  print_all_time_grid 0
+
+let develop_or_cnf (cnf1 : cnf) (cnf2 : cnf) =
+  List.fold_left
+    (fun acc clause1 -> acc @ List.map (fun clause2 -> clause1 @ clause2) cnf2)
+    [] cnf1
 
 let get_only_one_true_cnf (vars : int list) : cnf =
   let rec get_all_two_tuples_at_least_was_false = function
