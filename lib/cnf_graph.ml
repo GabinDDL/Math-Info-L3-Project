@@ -42,19 +42,19 @@ let get_variable_value var max_param =
   let x = x mod max_param in
   (not, x, y, t, c)
 
-let pp_var dim fmt var =
-  let not, x, y, t, c = get_variable_value var dim in
+let pp_var max_param fmt var =
+  let not, x, y, t, c = get_variable_value var max_param in
   if not then Format.fprintf fmt "not (%d, %d, %d, %d)" x y t c
   else Format.fprintf fmt "(%d, %d, %d, %d)" x y t c
 
-let pp_literal dim (fmt : Format.formatter) (e : literal) =
-  Format.fprintf fmt "%a" (pp_var dim) (literal_to_int e)
+let pp_literal max_param (fmt : Format.formatter) (e : literal) =
+  Format.fprintf fmt "%a" (pp_var max_param) (literal_to_int e)
 
-let pp_clause dim fmt (c : clause) =
-  List.iter (fun e -> Format.fprintf fmt "%a; " (pp_literal dim) e) c
+let pp_clause max_param fmt (c : clause) =
+  List.iter (fun e -> Format.fprintf fmt "%a; " (pp_literal max_param) e) c
 
-let pp_cnf dim fmt (c : cnf) =
-  List.iter (fun cl -> Format.fprintf fmt "%a\n" (pp_clause dim) cl) c
+let pp_cnf max_param fmt (c : cnf) =
+  List.iter (fun cl -> Format.fprintf fmt "%a\n" (pp_clause max_param) cl) c
 
 let pp_res_solved (fmt : Format.formatter) (res : Sat.res) =
   match res with
@@ -62,7 +62,7 @@ let pp_res_solved (fmt : Format.formatter) (res : Sat.res) =
   | Sat.Sat _ -> Format.fprintf fmt "sat\n"
 
 let pp_sat (fmt : Format.formatter) (res : Sat.res)
-    ((t_m, w, l, c_m) : int * int * int * int) dim =
+    ((t_m, w, l, c_m) : int * int * int * int) max_param =
   match res with
   | Sat.Sat a ->
       let rec print_res t x y c =
@@ -72,7 +72,7 @@ let pp_sat (fmt : Format.formatter) (res : Sat.res)
         else if x > w then print_res (t + 1) 0 y c
         else (
           Format.fprintf fmt "%d %d %d %d : %b\n" x y t c
-            (a.eval (int_to_literal (get_name_variable (x, y, t, c) dim)));
+            (a.eval (int_to_literal (get_name_variable (x, y, t, c) max_param)));
           print_res t x y (c + 1))
       in
       print_res 0 0 0 0
