@@ -74,9 +74,15 @@ let pp_sat (fmt : Format.formatter) (res : Sat.res)
 let get_only_one_true_cnf (vars : int list) : cnf =
   let rec get_all_two_tuple_at_less_was_false = function
     | [] -> []
-    | hd :: tl -> 
-      List.map (fun e -> [e |> int_to_literal |> get_negation_of;
-      hd |> int_to_literal |> get_negation_of]) tl @ get_all_two_tuple_at_less_was_false tl
+    | hd :: tl ->
+        List.map
+          (fun e ->
+            [
+              e |> int_to_literal |> get_negation_of;
+              hd |> int_to_literal |> get_negation_of;
+            ])
+          tl
+        @ get_all_two_tuple_at_less_was_false tl
   in
   let rec at_less_one_true = function
     | [] -> []
@@ -85,14 +91,13 @@ let get_only_one_true_cnf (vars : int list) : cnf =
   at_less_one_true vars :: get_all_two_tuple_at_less_was_false vars
 
 let check_each_case_has_only_one_color max_time w l
-    (possible_colors : color list) : cnf =
-  let coef = Int.max w l in
+    (possible_colors : color list) coef : cnf =
   let rec get_all_cnf_each_case_has_only_one_color time width length : cnf =
     if time < 0 then []
     else if width < 0 then
-      get_all_cnf_each_case_has_only_one_color time w (length - 1)
+      get_all_cnf_each_case_has_only_one_color time (w - 1) (length - 1)
     else if length < 0 then
-      get_all_cnf_each_case_has_only_one_color (time - 1) w l
+      get_all_cnf_each_case_has_only_one_color (time - 1) (w - 1) (l - 1)
     else
       let rec get_all_color colors =
         match colors with
@@ -106,10 +111,9 @@ let check_each_case_has_only_one_color max_time w l
   get_all_cnf_each_case_has_only_one_color (max_time - 1) (w - 1) (l - 1)
 
 let check_coloration_of_each_neighbor_is_different_for_each_node_of_the_graph w
-    l max_time possible_colors : cnf =
+    l max_time possible_colors coef : cnf =
   let check_coloration_of_each_neighbor_is_different_for_one_node (x : int)
       (y : int) (t : int) (possible_colors : color list) w l : cnf =
-    let coef = Int.max w l in
     let rec check_coord_have_one_color colors =
       match colors with
       | hd :: tl ->
@@ -155,8 +159,7 @@ let check_coloration_of_each_neighbor_is_different_for_each_node_of_the_graph w
   in
   check_coloration_of_each_node_each_time 0 0 0
 
-let check_coloration_after_modification_of_graph w l time possible_colors =
-  let coef = Int.max w l in
+let check_coloration_after_modification_of_graph w l time possible_colors coef =
   let rec get_cnf_check_coloration_after_modification_fro_each_node width height
       =
     if width < 0 then
@@ -203,10 +206,10 @@ let check_coloration_after_modification_of_graph w l time possible_colors =
   in
   get_cnf_check_coloration_after_modification_fro_each_node (w - 1) (l - 1)
 
-let check_coloration_start_and_final ((w1, l1), graph1) graph2 max_time : cnf =
+let check_coloration_start_and_final ((w1, l1), graph1) graph2 max_time coef :
+    cnf =
   let graph1 = Array.to_list graph1 in
   let graph2 = Array.to_list graph2 in
-  let coef = Int.max w1 l1 in
   let rec get_all_clause y t graph is_second_graph : cnf =
     match graph with
     | hd :: tl ->
@@ -231,17 +234,19 @@ let get_cnf g1 g2 max_time nbr_colors =
   let possible_colors = List.init nbr_colors (fun x -> x) in
   match (g1, g2) with
   | ((l1, w1), a1), ((l2, w2), a2) when l1 = l2 && w1 = w2 ->
+      let coef = Int.max (Int.max (Int.max w1 l1) max_time) nbr_colors + 1 in
       let rec check_coloration_after_modification_of_graph_for_all_time t =
         if t <= 0 then []
         else
           check_coloration_after_modification_of_graph w1 l1 t possible_colors
+            coef
           @ check_coloration_after_modification_of_graph_for_all_time (t - 1)
       in
-      check_each_case_has_only_one_color max_time w1 l1 possible_colors
-      @ check_coloration_start_and_final ((w1, l1), a1) a2 max_time
+      check_each_case_has_only_one_color max_time w1 l1 possible_colors coef
+      @ check_coloration_start_and_final ((w1, l1), a1) a2 max_time coef
       @ check_coloration_after_modification_of_graph_for_all_time max_time
       @ check_coloration_of_each_neighbor_is_different_for_each_node_of_the_graph
-          w1 l1 max_time possible_colors
+          w1 l1 max_time possible_colors coef
   | ((l1, w1), _), ((l2, w2), _) ->
       assert (l1 = l2 && w1 = w2);
       []

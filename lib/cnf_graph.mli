@@ -34,19 +34,20 @@ val get_variable_value : int -> int -> bool * int * int * int * int
 val get_only_one_true_cnf : int list -> cnf
 (** Function that generates a CNF that verifies that only one condition is true and the others are all false. *)
 
-val check_each_case_has_only_one_color : int -> int -> int -> color list -> cnf
+val check_each_case_has_only_one_color :
+  int -> int -> int -> color list -> int -> cnf
 (** Function that generates a CNF that checks if each neighbor in a graph do not have the same color. *)
 
 val check_coloration_of_each_neighbor_is_different_for_each_node_of_the_graph :
-  int -> int -> int -> int list -> cnf
+  int -> int -> int -> int list -> int -> cnf
 (** Function that generates the cnf that says if a graph is well colored at an instant t. *)
 
 val check_coloration_after_modification_of_graph :
-  int -> int -> int -> color list -> cnf
+  int -> int -> int -> color list -> int -> cnf
 (** Function that generates the cnf that says if a graph respects the rules of recoloring between t and t+1. *)
 
 val check_coloration_start_and_final :
-  (int * int) * int array array -> int array array -> int -> cnf
+  (int * int) * int array array -> int array array -> int -> int -> cnf
 (** Function that generates a CNF that checks if a graph has the right start and end color.*)
 
 val get_cnf :
