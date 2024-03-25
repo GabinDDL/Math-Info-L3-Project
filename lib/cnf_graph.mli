@@ -47,7 +47,8 @@ val check_coloration_of_one_node :
 val check_coloration_of_graph : int -> int -> int -> int -> cnf
 (** Function that generates the cnf that says if a graph is well colored at an instant t*)
 
-val check_coloration_modification_of_graph : int -> int -> color list -> int -> cnf
+val check_coloration_modification_of_graph :
+  int -> int -> color list -> int -> cnf
 (** Function that generates the cnf that says if a graph respects the rules of recoloring between t and t+1*)
 
 val pp_cnf : Format.formatter -> cnf -> unit
