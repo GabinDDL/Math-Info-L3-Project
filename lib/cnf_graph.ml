@@ -108,7 +108,7 @@ let check_each_case_has_only_one_color max_time w l
       get_only_one_true_cnf (get_all_color possible_colors)
       @ get_all_cnf_each_case_has_only_one_color time (width - 1) length
   in
-  get_all_cnf_each_case_has_only_one_color (max_time - 1) (w - 1) (l - 1)
+  get_all_cnf_each_case_has_only_one_color (max_time) (w - 1) (l - 1)
 
 let check_coloration_of_each_neighbor_is_different_for_each_node_of_the_graph w
     l max_time possible_colors coef : cnf =
@@ -147,17 +147,17 @@ let check_coloration_of_each_neighbor_is_different_for_each_node_of_the_graph w
     check_coord_have_one_color possible_colors
   in
   let rec check_coloration_of_each_node_each_time width height time =
-    if width >= w then
-      check_coloration_of_each_node_each_time 0 (height + 1) time
-    else if height >= l then
-      check_coloration_of_each_node_each_time 0 0 (time + 1)
-    else if time >= max_time then []
+    if width < 0 then
+      check_coloration_of_each_node_each_time (w-1) (height - 1) time
+    else if height < 0 then
+      check_coloration_of_each_node_each_time (w-1) (l-1) (time - 1)
+    else if time < 0 then []
     else
       check_coloration_of_each_neighbor_is_different_for_one_node width height
         time possible_colors
-      @ check_coloration_of_each_node_each_time (width + 1) height time
+      @ check_coloration_of_each_node_each_time (width - 1) height time
   in
-  check_coloration_of_each_node_each_time 0 0 0
+  check_coloration_of_each_node_each_time (w-1) (l-1) max_time
 
 let check_coloration_after_modification_of_graph w l t possible_colors coef :
     cnf =
@@ -209,7 +209,7 @@ let check_coloration_after_modification_of_graph w l t possible_colors coef :
           height time
   in
   get_cnf_check_coloration_after_modification_for_each_node (w - 1) (l - 1)
-    (t - 1)
+    t
 
 let check_coloration_start_and_final ((w1, l1), graph1) graph2 max_time coef :
     cnf =
