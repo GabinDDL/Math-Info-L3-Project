@@ -49,7 +49,7 @@ val check_coloration_after_modification_of_graph :
   int -> int -> int -> color list -> int -> cnf
 (** Function that generates the cnf that says if a graph respects the rules of recoloring between t and t+1. *)
 
-val check_coloration_start_and_final :
+val check_start_and_final_coloration :
   (int * int) * int array array -> int array array -> int -> int -> cnf
 (** Function that generates a CNF that checks if a graph has the right start and end color.*)
 

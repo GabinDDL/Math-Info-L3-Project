@@ -79,7 +79,7 @@ let pp_sat (fmt : Format.formatter) (res : Sat.res)
   | _ -> ()
 
 let get_only_one_true_cnf (vars : int list) : cnf =
-  let rec get_all_two_tuple_at_less_was_false = function
+  let rec get_all_two_tuple_at_least_was_false = function
     | [] -> []
     | hd :: tl ->
         List.map
@@ -89,13 +89,13 @@ let get_only_one_true_cnf (vars : int list) : cnf =
               hd |> int_to_literal |> get_negation_of;
             ])
           tl
-        @ get_all_two_tuple_at_less_was_false tl
+        @ get_all_two_tuple_at_least_was_false tl
   in
-  let rec at_less_one_true = function
+  let rec at_least_one_true = function
     | [] -> []
-    | hd :: tl -> (hd |> int_to_literal) :: at_less_one_true tl
+    | hd :: tl -> (hd |> int_to_literal) :: at_least_one_true tl
   in
-  at_less_one_true vars :: get_all_two_tuple_at_less_was_false vars
+  at_least_one_true vars :: get_all_two_tuple_at_least_was_false vars
 
 let check_each_case_has_only_one_color max_time w l
     (possible_colors : color list) max_param : cnf =
@@ -220,7 +220,7 @@ let check_coloration_after_modification_of_graph w l t possible_colors max_param
   in
   get_cnf_check_coloration_after_modification_for_each_node (w - 1) (l - 1) t
 
-let check_coloration_start_and_final ((w1, l1), graph1) graph2 max_time
+let check_start_and_final_coloration ((w1, l1), graph1) graph2 max_time
     max_param : cnf =
   let graph1 = Array.to_list graph1 in
   let graph2 = Array.to_list graph2 in
@@ -256,7 +256,7 @@ let get_cnf g1 g2 max_time nbr_colors =
       in
       check_each_case_has_only_one_color max_time w1 l1 possible_colors
         max_param
-      @ check_coloration_start_and_final ((w1, l1), a1) a2 max_time max_param
+      @ check_start_and_final_coloration ((w1, l1), a1) a2 max_time max_param
       @ check_coloration_after_modification_of_graph w1 l1 max_time
           possible_colors max_param
       @ check_coloration_of_each_neighbor_is_different_for_each_node_of_the_graph
