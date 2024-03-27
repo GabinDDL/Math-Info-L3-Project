@@ -31,6 +31,9 @@ val get_name_variable : int * int * int * int -> int -> int
 val get_variable_value : int -> int -> bool * int * int * int * int
 (** Bijective function that converts an integer into corresponding quadruplet. *)
 
+val pp_cnf : int -> Format.formatter -> cnf -> unit
+val pp_clause : int -> Format.formatter -> clause -> unit
+
 val get_only_one_true_cnf : int list -> cnf
 (** Function that generates a CNF that verifies that only one condition is true and the others are all false. *)
 
@@ -57,5 +60,3 @@ val get_cnf :
   int ->
   cnf
 (** Function that generates a CNF indicating whether one can pass from graph 1 to graph 2 with successive recolorations.*)
-
-val pp_cnf : Format.formatter -> cnf -> unit
