@@ -35,21 +35,28 @@ val pp_cnf : int -> Format.formatter -> cnf -> unit
 val pp_clause : int -> Format.formatter -> clause -> unit
 
 val get_only_one_true_cnf : int list -> cnf
-(** Function to create a CNF that verifies that only one condition is true and the others are all false. *)
+(** Function that generates a CNF that verifies that only one condition is true and the others are all false. *)
 
-val check_has_color : int * int * int * int -> color list -> int -> cnf
-(** Function that generates the cnf to check if a node is colored with a specific color and not with the others. *)
+val check_each_case_has_only_one_color :
+  int -> int -> int -> color list -> int -> cnf
+(** Function that generates a CNF that checks if each neighbor in a graph do not have the same color. *)
 
-val check_has_not_color : int * int * int * int -> color list -> int -> cnf
-(** Function that generates the cnf to check if a node is not colored with a specific color and is colored with a single other. *)
+val check_coloration_of_each_neighbor_is_different_for_each_node_of_the_graph :
+  int -> int -> int -> int list -> int -> cnf
+(** Function that generates the cnf that says if a graph is well colored at an instant t. *)
 
-val check_coloration_of_one_node :
-  int -> int -> int -> color list -> int -> int -> cnf
-(** Function that generates the cnf to check if a node is correctly colored. *)
+val check_coloration_after_modification_of_graph :
+  int -> int -> int -> color list -> int -> cnf
+(** Function that generates the cnf that says if a graph respects the rules of recoloring between t and t+1. *)
 
-val check_coloration_of_graph : int -> int -> int -> int -> cnf
-(** Function that generates the cnf that says if a graph is well colored at an instant t*)
+val check_start_and_final_coloration :
+  (int * int) * int array array -> int array array -> int -> int -> cnf
+(** Function that generates a CNF that checks if a graph has the right start and end color.*)
 
-val check_coloration_modification_of_graph :
-  int -> int -> color list -> int -> cnf
-(** Function that generates the cnf that says if a graph respects the rules of recoloring between t and t+1*)
+val get_cnf :
+  (int * int) * int array array ->
+  (int * int) * int array array ->
+  int ->
+  int ->
+  cnf
+(** Function that generates a CNF indicating whether one can pass from graph 1 to graph 2 with successive recolorations.*)
