@@ -252,7 +252,7 @@ let get_cnf g1 g2 max_time nbr_colors =
   match (g1, g2) with
   | ((l1, w1), a1), ((l2, w2), a2) when l1 = l2 && w1 = w2 ->
       let max_param =
-        Int.max (Int.max (Int.max w1 l1) max_time) nbr_colors + 1
+        Int.max (Int.max (Int.max w1 l1) max_time) nbr_colors + 2
       in
       check_each_case_has_only_one_color max_time w1 l1 possible_colors
         max_param
