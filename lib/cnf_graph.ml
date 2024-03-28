@@ -79,7 +79,7 @@ let pp_sat (fmt : Format.formatter) (res : Sat.res)
   | _ -> ()
 
 let get_only_one_true_cnf (vars : int list) : cnf =
-  let rec get_all_two_tuple_at_least_was_false = function
+  let rec get_all_two_tuples_at_least_was_false = function
     | [] -> []
     | hd :: tl ->
         List.map
@@ -89,13 +89,13 @@ let get_only_one_true_cnf (vars : int list) : cnf =
               hd |> int_to_literal |> get_negation_of;
             ])
           tl
-        @ get_all_two_tuple_at_least_was_false tl
+        @ get_all_two_tuples_at_least_was_false tl
   in
   let rec at_least_one_true = function
     | [] -> []
     | hd :: tl -> (hd |> int_to_literal) :: at_least_one_true tl
   in
-  at_least_one_true vars :: get_all_two_tuple_at_least_was_false vars
+  at_least_one_true vars :: get_all_two_tuples_at_least_was_false vars
 
 let check_each_case_has_only_one_color max_time w l
     (possible_colors : color list) max_param : cnf =
