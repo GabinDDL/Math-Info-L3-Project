@@ -114,11 +114,6 @@ let pp_toroidal_grid_recoloration_solution (t_m, w, l, c_m) dim
   in
   print_all_time_grid 0
 
-let develop_or_cnf (cnf1 : cnf) (cnf2 : cnf) =
-  List.fold_left
-    (fun acc clause1 -> acc @ List.map (fun clause2 -> clause1 @ clause2) cnf2)
-    [] cnf1
-
 let get_only_one_true_cnf (vars : int list) : cnf =
   let rec get_all_two_tuples_at_least_was_false = function
     | [] -> []
