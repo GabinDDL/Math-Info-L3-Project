@@ -78,114 +78,190 @@ let pp_sat (fmt : Format.formatter) (res : Sat.res)
       print_res 0 0 0 0
   | _ -> ()
 
-let develop_or_cnf (cnf1 : cnf) (cnf2 : cnf) =
-  List.fold_left
-    (fun acc clause1 -> acc @ List.map (fun clause2 -> clause1 @ clause2) cnf2)
-    [] cnf1
-
 let get_only_one_true_cnf (vars : int list) : cnf =
-  let rec only_var_true (var : int) = function
+  let rec get_all_two_tuples_at_least_was_false = function
     | [] -> []
     | hd :: tl ->
-        [
-          (if var = hd then var |> int_to_literal
-           else hd |> int_to_literal |> get_negation_of);
-        ]
-        :: only_var_true var tl
+        List.map
+          (fun e ->
+            [
+              e |> int_to_literal |> get_negation_of;
+              hd |> int_to_literal |> get_negation_of;
+            ])
+          tl
+        @ get_all_two_tuples_at_least_was_false tl
   in
-  let rec generate_exprs = function
+  let rec at_least_one_true = function
     | [] -> []
-    | hd :: tl when tl = [] -> only_var_true hd vars
-    | hd :: tl -> develop_or_cnf (only_var_true hd vars) (generate_exprs tl)
+    | hd :: tl -> (hd |> int_to_literal) :: at_least_one_true tl
   in
-  generate_exprs vars
+  at_least_one_true vars :: get_all_two_tuples_at_least_was_false vars
 
-let check_has_color (x, y, t, c) (possible_colors : color list)
-    (max_param : int) : cnf =
-  let rec aux res colors =
-    match colors with
-    | hd :: tl ->
-        [
-          (let var = get_name_variable (x, y, t, c) max_param in
-           if hd = c then var |> int_to_literal
-           else var |> int_to_literal |> get_negation_of);
-        ]
-        :: aux res tl
-    | [] -> []
-  in
-  aux [] possible_colors
-
-let check_has_not_color (x, y, t, c) possible_colors max_param : cnf =
-  [
-    get_name_variable (x, y, t, c) max_param
-    |> int_to_literal |> get_negation_of;
-  ]
-  :: get_only_one_true_cnf
-       (List.map
-          (fun color -> get_name_variable (x, y, t, color) max_param)
-          possible_colors)
-
-let check_coloration_of_one_node (x : int) (y : int) (t : int)
-    (possible_colors : color list) (dim : int) (max_param : int) : cnf =
-  let rec check_coord_have_one_color colors =
-    match colors with
-    | hd :: tl ->
-        develop_or_cnf
-          (check_has_not_color (x, y, t, hd) possible_colors max_param)
-          (check_has_not_color
-             ((x + 1) mod dim, y, t, hd)
-             possible_colors max_param
-          @ check_has_not_color
-              (x, (y + 1) mod dim, t, hd)
-              possible_colors max_param
-          @ check_has_not_color
-              ((x + dim - 1) mod dim, y, t, hd)
-              possible_colors max_param
-          @ check_has_not_color
-              (x, (y + dim - 1) mod dim, t, hd)
-              possible_colors max_param)
-        @ check_coord_have_one_color tl
-    | [] -> []
-  in
-  check_coord_have_one_color possible_colors
-
-let check_coloration_of_graph dim max_time nbr_colors max_param : cnf =
-  let colors = List.init nbr_colors (fun x -> x) in
-  let rec aux width height time =
-    if width >= dim then aux 0 (height + 1) time
-    else if height >= dim then aux 0 0 (time + 1)
-    else if time >= max_time then []
+let check_each_case_has_only_one_color max_time w l
+    (possible_colors : color list) max_param : cnf =
+  let rec get_all_cnf_each_case_has_only_one_color time width length : cnf =
+    if time < 0 then []
+    else if width < 0 then
+      get_all_cnf_each_case_has_only_one_color time (w - 1) (length - 1)
+    else if length < 0 then
+      get_all_cnf_each_case_has_only_one_color (time - 1) (w - 1) (l - 1)
     else
-      check_coloration_of_one_node width height time colors dim max_param
-      @ aux (width + 1) height time
+      let rec get_all_color colors =
+        match colors with
+        | hd :: tl ->
+            get_name_variable (width, length, time, hd) max_param
+            :: get_all_color tl
+        | [] -> []
+      in
+      get_only_one_true_cnf (get_all_color possible_colors)
+      @ get_all_cnf_each_case_has_only_one_color time (width - 1) length
   in
-  aux 0 0 0
+  get_all_cnf_each_case_has_only_one_color max_time (w - 1) (l - 1)
 
-let check_coloration_modification_of_graph dim time colors_list max_param =
-  let rec aux height width =
-    if width < 0 then aux (height - 1) dim
-    else if height < 0 then []
+let check_coloration_of_each_neighbor_is_different_for_each_node_of_the_graph w
+    l max_time possible_colors max_param : cnf =
+  let check_coloration_of_each_neighbor_is_different_for_one_node (x : int)
+      (y : int) (t : int) (possible_colors : color list) : cnf =
+    let rec check_coord_have_one_color colors =
+      match colors with
+      | hd :: tl ->
+          [
+            get_name_variable (x, y, t, hd) max_param
+            |> int_to_literal |> get_negation_of;
+            get_name_variable ((x + 1) mod w, y, t, hd) max_param
+            |> int_to_literal |> get_negation_of;
+          ]
+          :: [
+               get_name_variable (x, y, t, hd) max_param
+               |> int_to_literal |> get_negation_of;
+               get_name_variable (x, (y + 1) mod l, t, hd) max_param
+               |> int_to_literal |> get_negation_of;
+             ]
+          :: [
+               get_name_variable (x, y, t, hd) max_param
+               |> int_to_literal |> get_negation_of;
+               get_name_variable ((x + w - 1) mod w, y, t, hd) max_param
+               |> int_to_literal |> get_negation_of;
+             ]
+          :: [
+               get_name_variable (x, y, t, hd) max_param
+               |> int_to_literal |> get_negation_of;
+               get_name_variable (x, (y + l - 1) mod l, t, hd) max_param
+               |> int_to_literal |> get_negation_of;
+             ]
+          :: check_coord_have_one_color tl
+      | [] -> []
+    in
+    check_coord_have_one_color possible_colors
+  in
+  let rec check_coloration_of_each_node_each_time width height time =
+    if width < 0 then
+      check_coloration_of_each_node_each_time (w - 1) (height - 1) time
+    else if height < 0 then
+      check_coloration_of_each_node_each_time (w - 1) (l - 1) (time - 1)
+    else if time < 0 then []
+    else
+      check_coloration_of_each_neighbor_is_different_for_one_node width height
+        time possible_colors
+      @ check_coloration_of_each_node_each_time (width - 1) height time
+  in
+  check_coloration_of_each_node_each_time (w - 1) (l - 1) max_time
+
+let check_coloration_after_modification_of_graph w l t possible_colors max_param
+    : cnf =
+  let rec get_cnf_check_coloration_after_modification_for_each_node width height
+      time =
+    if width < 0 then
+      get_cnf_check_coloration_after_modification_for_each_node (w - 1)
+        (height - 1) time
+    else if height < 0 then
+      get_cnf_check_coloration_after_modification_for_each_node (w - 1) (l - 1)
+        (time - 1)
+    else if time < 0 then []
     else
       List.fold_left
         (fun acc color ->
-          develop_or_cnf
-            (check_has_not_color
-               (width, height, time, color)
-               colors_list max_param)
-            (check_has_not_color
-               ((width + 1) mod dim, height, time + 1, color)
-               colors_list max_param
-            @ check_has_not_color
-                ((width + dim - 1) mod dim, height, time + 1, color)
-                colors_list max_param
-            @ check_has_not_color
-                (width, (height + 1) mod dim, time + 1, color)
-                colors_list max_param
-            @ check_has_not_color
-                (width, (height + dim - 1) mod dim, time + 1, color)
-                colors_list max_param)
-          @ acc)
-        [] colors_list
-      @ aux height (width - 1)
+          [
+            get_name_variable (width, height, time, color) max_param
+            |> int_to_literal |> get_negation_of;
+            get_name_variable
+              ((width + 1) mod w, height, time + 1, color)
+              max_param
+            |> int_to_literal |> get_negation_of;
+          ]
+          :: [
+               get_name_variable (width, height, time, color) max_param
+               |> int_to_literal |> get_negation_of;
+               get_name_variable
+                 ((width + w - 1) mod w, height, time + 1, color)
+                 max_param
+               |> int_to_literal |> get_negation_of;
+             ]
+          :: [
+               get_name_variable (width, height, time, color) max_param
+               |> int_to_literal |> get_negation_of;
+               get_name_variable
+                 (width, (height + 1) mod l, time + 1, color)
+                 max_param
+               |> int_to_literal |> get_negation_of;
+             ]
+          :: [
+               get_name_variable (width, height, time, color) max_param
+               |> int_to_literal |> get_negation_of;
+               get_name_variable
+                 (width, (height + l - 1) mod l, time + 1, color)
+                 max_param
+               |> int_to_literal |> get_negation_of;
+             ]
+          :: acc)
+        [] possible_colors
+      @ get_cnf_check_coloration_after_modification_for_each_node (width - 1)
+          height time
   in
-  aux (dim - 1) (dim - 1)
+  get_cnf_check_coloration_after_modification_for_each_node (w - 1) (l - 1) t
+
+let check_start_and_final_coloration ((w1, l1), graph1) graph2 max_time
+    max_param : cnf =
+  let graph1 = Array.to_list graph1 in
+  let graph2 = Array.to_list graph2 in
+  let rec get_all_clause y t graph is_second_graph : cnf =
+    match graph with
+    | hd :: tl ->
+        let rec get_clause_for_line x hd : cnf =
+          match hd with
+          | fst_color :: other_color ->
+              [
+                get_name_variable (x, y, t, fst_color) max_param
+                |> int_to_literal;
+              ]
+              :: get_clause_for_line (x + 1) other_color
+          | [] ->
+              assert (x = w1);
+              get_all_clause (y + 1) t tl is_second_graph
+        in
+        get_clause_for_line 0 (Array.to_list hd)
+    | [] when is_second_graph -> []
+    | [] ->
+        assert (y = l1);
+        get_all_clause 0 max_time graph2 true
+  in
+  get_all_clause 0 0 graph1 false
+
+let get_cnf g1 g2 max_time nbr_colors =
+  let possible_colors = List.init nbr_colors (fun x -> x) in
+  match (g1, g2) with
+  | ((l1, w1), a1), ((l2, w2), a2) when l1 = l2 && w1 = w2 ->
+      let max_param =
+        Int.max (Int.max (Int.max w1 l1) max_time) nbr_colors + 2
+      in
+      check_each_case_has_only_one_color max_time w1 l1 possible_colors
+        max_param
+      @ check_start_and_final_coloration ((w1, l1), a1) a2 max_time max_param
+      @ check_coloration_after_modification_of_graph w1 l1 max_time
+          possible_colors max_param
+      @ check_coloration_of_each_neighbor_is_different_for_each_node_of_the_graph
+          w1 l1 max_time possible_colors max_param
+  | ((l1, w1), _), ((l2, w2), _) ->
+      assert (l1 = l2 && w1 = w2);
+      []
+(*never return this list*)
