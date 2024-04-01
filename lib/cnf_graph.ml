@@ -108,7 +108,7 @@ let pp_toroidal_grid_recoloration_solution (t_m, w, l, c_m) max_param
   match res with
   | Sat.Sat _ ->
       let rec print_all_time_grid t =
-        if t >= t_m then ()
+        if t > t_m then ()
         else (
           Format.fprintf fmt "%a\n"
             (pp_toroidal_grid_recoloration_at_time (t, w, l, c_m) max_param)
