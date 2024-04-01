@@ -1,20 +1,23 @@
-open Prjt_mi_recolor.Graph
+open Prjt_mi_recolor.Cnf_graph
 open Prjt_mi_recolor.Parser
 
 let run_solver_on_file file file_output =
   match parse_file_for_solver file with
   | Error e -> raise e
-  | Ok ((t, w, l, _), a_init, a_final) -> (
-      let grid_init = init_toroidal_grid 0 w l a_init in
-      let grid_final = init_toroidal_grid t w l a_final in
-      match file_output with
-      | None -> Format.printf "%a\n\n%a" pp_graph grid_init pp_graph grid_final
-      | Some output ->
-          let ic = open_out output in
-          Format.fprintf
-            (Format.formatter_of_out_channel ic)
-            "%a\n\n%a" pp_graph grid_init pp_graph grid_final;
-          close_out ic)
+  | Ok ((t, w, l, c), a_init, a_final) ->
+      let solver = create_solver () in
+      let res_cnf = get_cnf ((w, l), a_init) ((w, l), a_final) t c in
+      add_clauses solver res_cnf;
+      let fmt =
+        match file_output with
+        | None -> Format.std_formatter
+        | Some output -> output |> open_out |> Format.formatter_of_out_channel
+      in
+      Format.fprintf fmt "%a\n%a" pp_res_solved (get_result solver)
+        (pp_toroidal_grid_recoloration_solution (t, w, l, c)
+           (Int.max (Int.max (Int.max w l) t) c + 2))
+        (get_result solver)
+
 (* TODO: To change with the result of SAT solver. *)
 
 let () =
