@@ -20,8 +20,6 @@ let run_solver_on_file file file_output =
           (get_result solver)
       else Format.fprintf fmt "%a" pp_res_solved (get_result solver)
 
-(* TODO: To change with the result of SAT solver. *)
-
 let () =
   let l = Array.length Sys.argv in
   if l = 2 then run_solver_on_file Sys.argv.(1) None
