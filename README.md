@@ -80,7 +80,7 @@ $ dune exec prjt_mi_recolor file.txt
 
 The file must be in the following format:
 ```
-t l w c
+t l w c d
 n11 n12 n13 ... n1l
 n21 n22 ... ... ...
 n31 ... ... ... ...
@@ -93,7 +93,8 @@ m31 ... ... ... ...
 ... ... ... ... ...
 mw1 mw2 mw3 ... mwl
 ```
-With t the maximal time, l the length of the grid, w the width, c the number of color, and each variable n the color of node at the position x and y of the initial grid,
+With t the maximal time, l the length of the grid, w the width, c the number of color, d = 0 if the solution has to be displayed and another number if not,
+and each variable n the color of node at the position x and y of the initial grid,
 smaller than c + 1 and greatest than -1.
 \# the separator between the initial grid and the final grid, and each variable m the color of node at the position x and y of the final grid.
 
