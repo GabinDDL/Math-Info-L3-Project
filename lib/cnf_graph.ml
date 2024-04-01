@@ -81,7 +81,7 @@ let pp_sat ((t_m, w, l, c_m) : int * int * int * int) (max_param : int)
 exception Incorrect_Answer
 
 let pp_toroidal_grid_recoloration_at_time
-    ((t, w, l, c_m) : int * int * int * int) (dim : int)
+    ((t, w, l, c_m) : int * int * int * int) (max_param : int)
     (fmt : Format.formatter) (res : Sat.res) =
   match res with
   | Sat.Sat a ->
@@ -89,30 +89,34 @@ let pp_toroidal_grid_recoloration_at_time
         if y >= l then ()
         else if x >= w then (
           Format.fprintf fmt "\n";
-          print_time_grid 0 (y + 1) c_m)
-        else if c >= c_m then raise Incorrect_Answer
-        else if a.eval (int_to_literal (get_name_variable (x, y, t, c) dim))
+          print_time_grid 0 (y + 1) c)
+        else if c > c_m then raise Incorrect_Answer
+        else if
+          a.eval (int_to_literal (get_name_variable (x, y, t, c) max_param))
         then (
           Format.fprintf fmt "%d " c;
-          print_time_grid (x + 1) y 0)
+          print_time_grid (x + 1) y 1)
         else print_time_grid x y (c + 1)
       in
 
       Format.fprintf fmt "Time %d :\n" t;
-      print_time_grid 0 0 0
+      print_time_grid 0 0 1
   | _ -> ()
 
-let pp_toroidal_grid_recoloration_solution (t_m, w, l, c_m) dim
+let pp_toroidal_grid_recoloration_solution (t_m, w, l, c_m) max_param
     (fmt : Format.formatter) (res : Sat.res) =
-  let rec print_all_time_grid t =
-    if t >= t_m then ()
-    else
-      Format.fprintf fmt "%a\n"
-        (pp_toroidal_grid_recoloration_at_time (t, w, l, c_m) dim)
-        res;
-    print_all_time_grid (t + 1)
-  in
-  print_all_time_grid 0
+  match res with
+  | Sat.Sat _ ->
+      let rec print_all_time_grid t =
+        if t >= t_m then ()
+        else (
+          Format.fprintf fmt "%a\n"
+            (pp_toroidal_grid_recoloration_at_time (t, w, l, c_m) max_param)
+            res;
+          print_all_time_grid (t + 1))
+      in
+      print_all_time_grid 0
+  | _ -> ()
 
 let get_only_one_true_cnf (vars : int list) : cnf =
   let rec get_all_two_tuples_at_least_was_false = function
@@ -284,7 +288,7 @@ let check_start_and_final_coloration ((w1, l1), graph1) graph2 max_time
   get_all_clause 0 0 graph1 false
 
 let get_cnf g1 g2 max_time nbr_colors =
-  let possible_colors = List.init nbr_colors (fun x -> x) in
+  let possible_colors = List.init nbr_colors (fun x -> x + 1) in
   match (g1, g2) with
   | ((l1, w1), a1), ((l2, w2), a2) when l1 = l2 && w1 = w2 ->
       let max_param =
