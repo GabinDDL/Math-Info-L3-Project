@@ -10,7 +10,12 @@ let parse_graph_informations (ic : in_channel) :
     let dim_str_list = String.split_on_char ' ' l in
     match dim_str_list with
     | [ t; w; l; c; d ] ->
-        Ok (int_of_string t, int_of_string w, int_of_string l, int_of_string c, if int_of_string d = 0 then true else false)
+        Ok
+          ( int_of_string t,
+            int_of_string w,
+            int_of_string l,
+            int_of_string c,
+            if int_of_string d = 0 then true else false )
     | _ -> raise Wrong_number_of_args
   with e -> Error e
 
@@ -43,7 +48,9 @@ let parse_graph_separator (ic : in_channel) : (unit, exn) result =
   with e -> Error e
 
 let parse_file_for_solver (file : string) :
-    ((int * int * int * int * bool) * int array array * int array array, exn) result =
+    ( (int * int * int * int * bool) * int array array * int array array,
+      exn )
+    result =
   let ic = open_in file in
 
   match parse_graph_informations ic with
