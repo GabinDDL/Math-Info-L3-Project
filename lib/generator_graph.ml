@@ -148,4 +148,4 @@ let start () =
   print_string "Parity is the same: ";
   if List.for_all (fun b -> b) result then print_string "true"
   else print_string "false";
-  print_newline ();
+  print_newline ()
