@@ -1,35 +1,5 @@
-let tilesA = [ [ [ 2; 3 ]; [ 3; 1 ] ]; [ [ 1; 3 ]; [ 3; 2 ] ] ]
-
-let tilesB =
-  [
-    [ [ 2; 1 ]; [ 1; 4 ] ];
-    [ [ 3; 1 ]; [ 1; 4 ] ];
-    [ [ 2; 1 ]; [ 3; 4 ] ];
-    [ [ 2; 3 ]; [ 1; 4 ] ];
-    [ [ 1; 3 ]; [ 4; 2 ] ];
-    [ [ 3; 2 ]; [ 1; 4 ] ];
-    [ [ 2; 3 ]; [ 3; 4 ] ];
-    [ [ 4; 1 ]; [ 1; 2 ] ];
-    [ [ 4; 1 ]; [ 1; 3 ] ];
-    [ [ 4; 1 ]; [ 3; 2 ] ];
-    [ [ 4; 3 ]; [ 1; 2 ] ];
-    [ [ 2; 3 ]; [ 4; 1 ] ];
-    [ [ 4; 2 ]; [ 1; 3 ] ];
-    [ [ 4; 3 ]; [ 3; 2 ] ];
-  ]
-
 let copy_matrix matrix =
-  let rows = Array.length matrix in
-  let cols = if rows > 0 then Array.length matrix.(0) else 0 in
-  let new_matrix = Array.make_matrix rows cols 0 in
-  let rec copy_each_case i j =
-    if j >= rows then new_matrix
-    else if i >= cols then copy_each_case 0 (j + 1)
-    else (
-      new_matrix.(i).(j) <- matrix.(i).(j);
-      copy_each_case (i + 1) j)
-  in
-  copy_each_case 0 0
+  Array.init (Array.length matrix) (fun i -> Array.copy matrix.(i))
 
 let check_neighbors_does_not_have_same_color grid height width current_row
     current_col color =
@@ -88,7 +58,15 @@ let check_graphs_differ_by_one_value_on_middle arr1 arr2 =
     in
     count_differences 0 0 0
 
-let is_parity_between_tiles_A_and_B graph =
+let count_number_tile_a_and_b set_tiles set_tilesA set_tilesB =
+  List.fold_left
+    (fun acc e ->
+      if List.exists (fun x -> x = e) set_tilesA then acc + 1
+      else if List.exists (fun x -> x = e) set_tilesB then acc + 1
+      else acc)
+    0 set_tiles
+
+let is_parity_between_tiles_A_and_B graph set_tilesA set_tilesB =
   let tiles_from_graph =
     match graph with
     | [| [| a; b; c |]; [| d; e; f |]; [| g; h; i |] |] ->
@@ -102,25 +80,24 @@ let is_parity_between_tiles_A_and_B graph =
   in
   if tiles_from_graph = [] then false
   else
-    let acc =
-      List.fold_left
-        (fun acc e ->
-          if List.exists (fun x -> x = e) tilesA then acc + 1
-          else if List.exists (fun x -> x = e) tilesB then acc + 1
-          else acc)
-        0 tiles_from_graph
+    let number_tile_a_and_b =
+      count_number_tile_a_and_b tiles_from_graph set_tilesA set_tilesB
     in
-    acc mod 2 = 0
+    number_tile_a_and_b mod 2 = 0
 
-let check_conserv_parity graphs nbr_graphs =
+let check_conserv_parity graphs nbr_graphs set_tilesA set_tilesB =
   let rec for_all_pairs i j count_pair conserv_Parity_list =
     if i >= nbr_graphs then (count_pair, conserv_Parity_list)
     else if j >= nbr_graphs then
       for_all_pairs (i + 1) (i + 2) count_pair conserv_Parity_list
     else if check_graphs_differ_by_one_value_on_middle graphs.(i) graphs.(j)
     then
-      let parity_of_first_tile = is_parity_between_tiles_A_and_B graphs.(i) in
-      let parity_of_second_tile = is_parity_between_tiles_A_and_B graphs.(j) in
+      let parity_of_first_tile =
+        is_parity_between_tiles_A_and_B graphs.(i) set_tilesA set_tilesB
+      in
+      let parity_of_second_tile =
+        is_parity_between_tiles_A_and_B graphs.(j) set_tilesA set_tilesB
+      in
       (* parity_of_first_tile <=> parity_of_second_tile *)
       let prop_check =
         ((not parity_of_first_tile) || parity_of_second_tile)
@@ -136,12 +113,33 @@ let start () =
   let width = 3 in
   let height = 3 in
   let max_colors = 4 in
+  let set_tilesA = [ [ [ 2; 3 ]; [ 3; 1 ] ]; [ [ 1; 3 ]; [ 3; 2 ] ] ] in
+  let set_tilesB =
+    [
+      [ [ 2; 1 ]; [ 1; 4 ] ];
+      [ [ 3; 1 ]; [ 1; 4 ] ];
+      [ [ 2; 1 ]; [ 3; 4 ] ];
+      [ [ 2; 3 ]; [ 1; 4 ] ];
+      [ [ 1; 3 ]; [ 4; 2 ] ];
+      [ [ 3; 2 ]; [ 1; 4 ] ];
+      [ [ 2; 3 ]; [ 3; 4 ] ];
+      [ [ 4; 1 ]; [ 1; 2 ] ];
+      [ [ 4; 1 ]; [ 1; 3 ] ];
+      [ [ 4; 1 ]; [ 3; 2 ] ];
+      [ [ 4; 3 ]; [ 1; 2 ] ];
+      [ [ 2; 3 ]; [ 4; 1 ] ];
+      [ [ 4; 2 ]; [ 1; 3 ] ];
+      [ [ 4; 3 ]; [ 3; 2 ] ];
+    ]
+  in
   let tiles = Array.of_list (generate_all_colorings width height max_colors) in
   let count_graph = Array.length tiles in
   print_string "Number of graph with good coloring: ";
   print_int count_graph;
   print_newline ();
-  let count_pair, result = check_conserv_parity tiles count_graph in
+  let count_pair, result =
+    check_conserv_parity tiles count_graph set_tilesA set_tilesB
+  in
   print_string "Number of pairs obtainable with only changing the middle node: ";
   print_int count_pair;
   print_newline ();
