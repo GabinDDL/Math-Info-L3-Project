@@ -35,13 +35,18 @@ let check_neighbors_does_not_have_same_color grid height width current_row
     current_col color =
   let neighbors =
     [
-      ((current_row - 1 + height) mod height, current_col);
-      ((current_row + 1) mod height, current_col);
-      (current_row, (current_col - 1 + width) mod width);
-      (current_row, (current_col + 1) mod width);
+      (current_row - 1, current_col);
+      (current_row + 1, current_col);
+      (current_row, current_col - 1);
+      (current_row, current_col + 1);
     ]
   in
-  List.for_all (fun (row, col) -> grid.(row).(col) <> color) neighbors
+  List.for_all
+    (fun (row, col) ->
+      if row >= 0 && col >= 0 && row < height && col < width then
+        grid.(row).(col) <> color
+      else true)
+    neighbors
 
 let rec generate_colorings grid width height current_row current_col max_colors
     =
@@ -78,7 +83,7 @@ let check_graphs_differ_by_one_value_on_middle arr1 arr2 =
       else if j >= Array.length arr1 then cmp = 1
       else if i >= Array.length arr1.(j) then count_differences 0 (j + 1) cmp
       else if arr1.(j).(i) <> arr2.(j).(i) then
-        if i = 1 && j = 2 then count_differences (i + 1) j (cmp + 1) else false
+        if i = 1 && j = 1 then count_differences (i + 1) j (cmp + 1) else false
       else count_differences (i + 1) j cmp
     in
     count_differences 0 0 0
@@ -92,11 +97,6 @@ let is_parity_between_tiles_A_and_B graph =
           [ [ b; c ]; [ e; f ] ];
           [ [ d; e ]; [ g; h ] ];
           [ [ e; f ]; [ h; i ] ];
-          [ [ i; g ]; [ c; a ] ];
-          [ [ g; h ]; [ a; b ] ];
-          [ [ h; i ]; [ b; c ] ];
-          [ [ c; a ]; [ d; f ] ];
-          [ [ f; d ]; [ i; g ] ];
         ]
     | _ -> []
   in
@@ -138,10 +138,10 @@ let start () =
   let max_colors = 4 in
   let tiles = Array.of_list (generate_all_colorings width height max_colors) in
   let count_graph = Array.length tiles in
-  let count_pair, result = check_conserv_parity tiles count_graph in
   print_string "Number of graph with good coloring: ";
   print_int count_graph;
   print_newline ();
+  let count_pair, result = check_conserv_parity tiles count_graph in
   print_string "Number of pairs obtainable with only changing the middle node: ";
   print_int count_pair;
   print_newline ();
