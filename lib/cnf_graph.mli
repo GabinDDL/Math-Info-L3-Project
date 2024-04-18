@@ -65,4 +65,4 @@ val get_cnf :
 (** Function that generates a CNF indicating whether one can pass from graph 1 to graph 2 with successive recolorations.*)
 
 val generate_random_4_coloration_graph : int -> int -> int array array option
-val pp_graph : Format.formatter -> int array array -> int -> int -> unit
+val pp_graph : Format.formatter -> int array array -> unit

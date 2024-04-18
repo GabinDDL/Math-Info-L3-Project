@@ -306,17 +306,12 @@ let get_cnf g1 g2 max_time nbr_colors =
       []
 (*never return this list*)
 
-let pp_graph fmt g w l =
-  let rec aux_print_graph x y =
-    if y = l then ()
-    else if x = w then (
-      Format.fprintf fmt "\n";
-      aux_print_graph 0 (y + 1))
-    else (
-      Format.fprintf fmt "%d " g.(y).(x);
-      aux_print_graph (x + 1) y)
-  in
-  aux_print_graph 0 0
+let pp_graph fmt g =
+  Array.iter
+    (fun current_row ->
+      Array.iter (fun cell -> Format.fprintf fmt "%d " cell) current_row;
+      Format.fprintf fmt "\n")
+    g
 
 let shuffle l =
   let rec aux_shuffle = function
@@ -385,7 +380,7 @@ let find_upper_recoloration g w l x y =
          ])
   then (
     Format.printf "Error (%d, %d)\n" x y;
-    pp_graph Format.std_formatter g w l;
+    pp_graph Format.std_formatter g;
     assert false)
   else ()
 
