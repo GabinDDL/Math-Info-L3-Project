@@ -397,7 +397,7 @@ let fill_random_case_graph g w l x y =
 let generate_random_4_coloration_graph w l =
   if w <= 0 || l <= 0 then None
   else
-    let g = Array.make_matrix w l 0 in
+    let g = Array.make_matrix l w 0 in
     let all_cases = get_all_cases w l in
     let random_cases = shuffle all_cases in
     let rec aux_generate_random_4_coloration_graph lst =
