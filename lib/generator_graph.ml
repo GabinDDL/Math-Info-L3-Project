@@ -46,15 +46,22 @@ let generate_all_colorings width height max_colors =
   generate_colorings grid width height 0 0 max_colors
 
 let check_graphs_differ_by_one_value_on_middle arr1 arr2 =
-  if Array.length arr1 <> Array.length arr2 then false
+  let length_arr1 = Array.length arr1 in
+  let length_arr2 = Array.length arr2 in
+  if length_arr1 <> length_arr2 then false
   else
     let rec count_differences i j cmp =
       if cmp >= 2 then false
-      else if j >= Array.length arr1 then cmp = 1
-      else if i >= Array.length arr1.(j) then count_differences 0 (j + 1) cmp
-      else if arr1.(j).(i) <> arr2.(j).(i) then
-        if i = 1 && j = 1 then count_differences (i + 1) j (cmp + 1) else false
-      else count_differences (i + 1) j cmp
+      else if j >= length_arr1 then cmp = 1
+      else
+        let length_sub_arr1 = Array.length arr1.(j) in
+        let length_sub_arr2 = Array.length arr2.(j) in
+        if length_sub_arr1 <> length_sub_arr2 then false
+        else if i >= length_sub_arr1 then count_differences 0 (j + 1) cmp
+        else if arr1.(j).(i) <> arr2.(j).(i) then
+          if i = 1 && j = 1 then count_differences (i + 1) j (cmp + 1)
+          else false
+        else count_differences (i + 1) j cmp
     in
     count_differences 0 0 0
 
