@@ -290,7 +290,7 @@ let check_start_and_final_coloration ((w1, l1), graph1) graph2 max_time
 let get_cnf g1 g2 max_time nbr_colors =
   let possible_colors = List.init nbr_colors (fun x -> x + 1) in
   match (g1, g2) with
-  | ((l1, w1), a1), ((l2, w2), a2) when l1 = l2 && w1 = w2 ->
+  | ((w1, l1), a1), ((w2, l2), a2) when l1 = l2 && w1 = w2 ->
       let max_param =
         Int.max (Int.max (Int.max w1 l1) max_time) nbr_colors + 2
       in
