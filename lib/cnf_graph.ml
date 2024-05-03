@@ -305,3 +305,101 @@ let get_cnf g1 g2 max_time nbr_colors =
       assert (l1 = l2 && w1 = w2);
       []
 (*never return this list*)
+
+let pp_graph fmt g =
+  Array.iter
+    (fun current_row ->
+      Array.iter (fun cell -> Format.fprintf fmt "%d " cell) current_row;
+      Format.fprintf fmt "\n")
+    g
+
+let shuffle l =
+  let rec aux_shuffle = function
+    | [] -> []
+    | [ e ] -> [ e ]
+    | l ->
+        let left, right = List.partition (fun _ -> Random.bool ()) l in
+        List.rev_append (aux_shuffle left) (aux_shuffle right)
+  in
+  aux_shuffle l
+
+let get_all_cases w l =
+  let rec aux_get_all_cases x y acc =
+    if y = l then acc
+    else if x = w then aux_get_all_cases 0 (y + 1) acc
+    else aux_get_all_cases (x + 1) y ((x, y) :: acc)
+  in
+  aux_get_all_cases 0 0 []
+
+let my_mod x y =
+  let result = x mod y in
+  if result < 0 then result + y else result
+
+let get_possible_colors g w l x y =
+  let possible_colors = [ 1; 2; 3; 4 ] in
+  let rec aux_get_possible_colors colors acc =
+    match colors with
+    | [] -> acc
+    | n :: tl ->
+        if
+          g.(my_mod (y + 1) l).(x) = n
+          || g.(y).(my_mod (x + 1) w) = n
+          || g.(my_mod (y - 1) l).(x) = n
+          || g.(y).(my_mod (x - 1) w) = n
+        then aux_get_possible_colors tl acc
+        else aux_get_possible_colors tl (n :: acc)
+  in
+  aux_get_possible_colors possible_colors []
+
+let find_upper_recoloration g w l x y =
+  g.(my_mod (y - 1) l).(x) <- 0;
+  g.(my_mod (y - 1) l).(my_mod (x + 1) w) <- 0;
+  g.(y).(my_mod (x + 1) w) <- 0;
+  let rec try_to_color lst =
+    match lst with
+    | [] -> true
+    | (a, b) :: tl ->
+        let possible_colors = get_possible_colors g w l a b in
+        let rec try_colors colors =
+          match colors with
+          | [] -> false
+          | c :: tl_color ->
+              g.(b).(a) <- c;
+              if try_to_color tl then true else try_colors tl_color
+        in
+        try_colors possible_colors
+  in
+  if
+    not
+      (try_to_color
+         [
+           (x, my_mod (y - 1) l);
+           (my_mod (x + 1) w, my_mod (y - 1) l);
+           (x, y);
+           (my_mod (x + 1) w, y);
+         ])
+  then (
+    Format.printf "Error (%d, %d)\n" x y;
+    pp_graph Format.std_formatter g;
+    assert false)
+  else ()
+
+let fill_random_case_graph g w l x y =
+  let possible_colors = get_possible_colors g w l x y in
+  if possible_colors <> [] then g.(y).(x) <- List.hd (shuffle possible_colors)
+  else find_upper_recoloration g w l x y
+
+let generate_random_4_coloration_graph w l =
+  if w <= 0 || l <= 0 then None
+  else
+    let g = Array.make_matrix l w 0 in
+    let all_cases = get_all_cases w l in
+    let random_cases = shuffle all_cases in
+    let rec aux_generate_random_4_coloration_graph lst =
+      match lst with
+      | [] -> Some g
+      | (x, y) :: tl ->
+          fill_random_case_graph g w l x y;
+          aux_generate_random_4_coloration_graph tl
+    in
+    aux_generate_random_4_coloration_graph random_cases
