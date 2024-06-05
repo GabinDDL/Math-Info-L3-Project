@@ -1,5 +1,6 @@
 open Prjt_mi_recolor.Cnf_graph
 open Prjt_mi_recolor.Parser
+open Prjt_mi_recolor.Generator_graph
 
 let run_solver_on_file file file_output =
   match parse_file_for_solver file with
@@ -27,6 +28,26 @@ let run_solver_on_file file file_output =
 
 let () =
   let l = Array.length Sys.argv in
-  if l = 2 then run_solver_on_file Sys.argv.(1) None
-  else if l = 3 then run_solver_on_file Sys.argv.(1) (Some Sys.argv.(2))
+  if l >= 2 then (
+    if Sys.argv.(1) = "-s" then (
+      if l = 3 then run_solver_on_file Sys.argv.(2) None
+      else if l = 4 then run_solver_on_file Sys.argv.(2) (Some Sys.argv.(3)))
+    else if l = 2 && Sys.argv.(1) = "-t" then start ()
+    else if Sys.argv.(1) = "-g" then Random.self_init ();
+    if l = 7 then
+      test_on_generate_graph
+        (int_of_string Sys.argv.(2))
+        (int_of_string Sys.argv.(3))
+        (int_of_string Sys.argv.(4))
+        (int_of_string Sys.argv.(5))
+        (int_of_string Sys.argv.(6))
+        None
+    else if l = 8 then
+      test_on_generate_graph
+        (int_of_string Sys.argv.(2))
+        (int_of_string Sys.argv.(3))
+        (int_of_string Sys.argv.(4))
+        (int_of_string Sys.argv.(5))
+        (int_of_string Sys.argv.(6))
+        (Some Sys.argv.(7)))
   else failwith "Not a good number of arg"

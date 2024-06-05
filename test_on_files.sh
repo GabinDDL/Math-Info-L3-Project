@@ -14,7 +14,7 @@ INPUT_EXT="input"
 EXP_OUTPUT_EXT="expected_output"
 OUTPUT_EXT="output"
 TEMP_DIFF_FILE=".diff_temp"
-EXEC="dune exec prjt_mi_recolor"
+EXEC="dune exec prjt_mi_recolor -- -s"
 
 ############################
 # Color print functions #

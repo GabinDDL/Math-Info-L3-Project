@@ -66,3 +66,4 @@ val get_cnf :
 
 val generate_random_4_coloration_graph : int -> int -> int array array option
 val pp_graph : Format.formatter -> int array array -> unit
+val test_on_generate_graph : int -> int -> int -> int -> int -> string option -> unit

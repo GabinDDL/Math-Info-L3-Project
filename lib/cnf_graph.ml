@@ -1,4 +1,5 @@
 open Graph
+open Msat
 module Sat = Msat_sat
 module Element = Sat.Int_lit (* expressions *)
 
@@ -403,3 +404,43 @@ let generate_random_4_coloration_graph w l =
           aux_generate_random_4_coloration_graph tl
     in
     aux_generate_random_4_coloration_graph random_cases
+
+let test_on_generate_graph n w l t d file_output =
+  let rec aux_test_generate_graph c =
+    if c = n then ()
+    else
+      let g1_opt = generate_random_4_coloration_graph w l in
+      let g2_opt = generate_random_4_coloration_graph w l in
+      match (g1_opt, g2_opt) with
+      | Some g1, Some g2 ->
+          let co = 4 in
+          (let cn = get_cnf ((w, l), g1) ((w, l), g2) t co in
+           let solver = create_solver () in
+           add_clauses solver cn;
+           let print_result fmt =
+             Format.fprintf fmt "-- Test %d --\n" c;
+             if d = 1 then (
+               let res = get_result solver in
+               Format.fprintf fmt "%a\n%a" pp_res_solved (get_result solver)
+                 (pp_toroidal_grid_recoloration_solution (t, w, l, co)
+                    (Int.max (Int.max (Int.max w l) t) co + 2))
+                 res;
+               match res with
+               | Sat.Unsat _ ->
+                   Format.fprintf fmt "Initial graph:\n%a\n\nEnd graph:\n%a"
+                     pp_graph g1 pp_graph g2
+               | _ -> ())
+             else Format.fprintf fmt "%a\n" pp_res_solved (get_result solver)
+           in
+           match file_output with
+           | None -> print_result Format.std_formatter
+           | Some output ->
+               let desc_to_use = output |> open_out in
+               let fmt = Format.formatter_of_out_channel desc_to_use in
+               print_result fmt;
+               Format.pp_print_flush fmt ();
+               close_out desc_to_use);
+          aux_test_generate_graph (c + 1)
+      | _ -> ()
+  in
+  aux_test_generate_graph 0
